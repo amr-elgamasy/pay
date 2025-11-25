@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فلوسنا - المحفظة الجماعية</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <!-- Chart.js for Charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Arabic Font Support for jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1e40af;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-color: #f8fafc;
+            --dark-color: #2d3748;
+            --gray-color: #718096;
+            --soft-bg: #f7fafc;
+            --border-color: #e2e8f0;
+            --text-muted: #718096;
+        }
+
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f5 100%);
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            color: var(--dark-color);
+            padding: 1.2rem 0;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo i {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav ul li a {
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            position: relative;
+        }
+
+        nav ul li a:hover, nav ul li a.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        main {
+            padding: 3rem 0;
+            min-height: calc(100vh - 120px);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem 1rem 1.5rem;
+            margin: -2rem -2rem 1.5rem -2rem;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.5) 0%, rgba(255, 255, 255, 0.5) 100%);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .card-header i {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5rem;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            color: var(--dark-color);
+            text-align: center;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.06);
+            padding: 1.5rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+
+        .balance-card .card-header {
+            margin-bottom: 0.75rem !important;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .balance-amount {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0.75rem 0;
+            text-shadow: none;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .balance-card .btn {
+            margin-top: 1rem !important;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            transform: scale(1.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+            color: var(--gray-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        label i {
+            color: var(--primary-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background-color: white;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+            color: white !important;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .wallet-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .wallet-number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0.8rem 0;
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .deposits-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .deposits-container {
+            width: 100%;
+            max-height: calc(10 * 4.5rem);
+            overflow-y: auto;
+        }
+
+        .deposits-table thead {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: var(--dark-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .deposits-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: right;
+            border: none;
+            color: var(--dark-color);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .deposits-table th i {
+            margin-left: 0.5rem;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .deposits-table td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--dark-color);
+            font-size: 0.95rem;
+        }
+
+        .deposits-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .deposits-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--warning-color);
+        }
+
+        .status-approved {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+        }
+
+        .status-rejected {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 1rem;
+            border-radius: 8px;
+            display: none;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+        }
+
+        .admin-login {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .admin-section {
+            margin-bottom: 2rem;
+        }
+
+        .recent-deposit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .recent-deposit-item:hover {
+            background: #f8fafc;
+            transform: translateX(-5px);
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.1);
+        }
+
+        .deposit-name {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .deposit-amount {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f5 100%);
+            color: var(--dark-color);
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.04);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-color);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Search and Filter Styles */
+        .search-filter-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.7rem 1.2rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .export-btn {
+            padding: 0.7rem 1.2rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Sort Indicator */
+        .sort-indicator {
+            display: inline-block;
+            margin-left: 0.5rem;
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
+        .deposits-table th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .deposits-table th:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+            height: 300px;
+        }
+
+
+
+        /* ========== رسوم بيانية ==========*/
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        /* ========== تصنيفات المصروفات ==========*/
+        .expense-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ========== ملاحظات على الإيداعات ==========*/
+        .notes-section {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 8px;
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Cairo', sans-serif;
+            margin-top: 0.5rem;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        /* ========== سجل الأنشطة ==========*/
+        .activity-log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.2rem;
+        }
+
+        .activity-time {
+            color: var(--gray-color);
+            font-size: 0.8rem;
+        }
+
+        /* ========== Modal للملاحظات ==========*/
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--dark-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+            padding: 0;
+            width: auto;
+            box-shadow: none;
+        }
+
+        .close-btn:hover {
+            color: var(--dark-color);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                width: 100%;
+            }
+
+            nav ul li a {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .balance-amount {
+                font-size: 2.5rem;
+            }
+            
+            div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .deposits-table {
+                font-size: 0.9rem;
+            }
+
+            .deposits-table th,
+            .deposits-table td {
+                padding: 0.7rem 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .card-header {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            main {
+                padding: 1.5rem 0;
+            }
+
+            .card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .balance-amount {
+                font-size: 2rem;
+            }
+
+            nav ul li a {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .stat-item {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .fab:hover {
+            transform: scale(1.15);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .fab {
+                bottom: 1.5rem;
+                left: 1.5rem;
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .fab {
+                bottom: 1rem;
+                left: 1rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-wallet"></i>
+                فلوسنا
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> الرئيسية</a></li>
+                    <li><a href="#" class="nav-link" data-page="deposits"><i class="fas fa-list"></i> السجل</a></li>
+                    <li><a href="#" class="nav-link" data-page="admin"><i class="fas fa-cog"></i> الإدارة</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section id="home" class="page active">
+                <div class="card balance-card" data-aos="fade-up">
+                    <h2 class="card-header" style="border: none; color: var(--dark-color); justify-content: center;">
+                        <i class="fas fa-chart-line"></i>
+                        الرصيد الإجمالي
+                    </h2>
+                    <div class="balance-amount" id="total-balance">
+                        <i class="fas fa-pound-sign"></i> 0
+                    </div>
+                    <button class="btn" style="align-self: center;" onclick="showPage('add-deposit'); document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));">
+                        <i class="fas fa-plus"></i> إيداع جديد
+                    </button>
+                </div>
+
+                <div class="card" data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="card-header">
+                        <i class="fas fa-chart-bar"></i>
+                        الإحصائيات والرصيد الإجمالي
+                    </h2>
+                    <div class="stats">
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="100">
+                            <i class="fas fa-wallet" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--primary-color);"></i>
+                            <div class="stat-value" id="home-total-balance">0</div>
+                            <div class="stat-label">الرصيد الحالي</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="150">
+                            <i class="fas fa-arrow-down" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--success-color);"></i>
+                            <div class="stat-value" id="home-total-deposits-amount">0</div>
+                            <div class="stat-label">إجمالي الإيداعات</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="200">
+                            <i class="fas fa-arrow-up" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger-color);"></i>
+                            <div class="stat-value" id="home-total-expenses-amount">0</div>
+                            <div class="stat-label">إجمالي المصروفات</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="250">
+                            <i class="fas fa-sort-amount-down" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: #8b5cf6;"></i>
+                            <div class="stat-value" id="total-deposits">0</div>
+                            <div class="stat-label">عدد الإيداعات</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="300">
+                            <i class="fas fa-shopping-cart" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: #f59e0b;"></i>
+                            <div class="stat-value" id="total-expenses">0</div>
+                            <div class="stat-label">عدد المصروفات</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" data-aos="fade-up" data-aos-delay="150">
+                    <h2 class="card-header">
+                        <i class="fas fa-history"></i>
+                        آخر الإيداعات
+                    </h2>
+                    <div id="recent-deposits"></div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section" data-aos="fade-up" data-aos-delay="200">
+                    <div class="chart-card">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-pie" style="color: var(--primary-color);"></i>
+                            توزيع الإيداعات حسب الحالة
+                        </h3>
+                        <canvas id="depositsStatusChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-line" style="color: var(--success-color);"></i>
+                            الإيداعات والمصروفات
+                        </h3>
+                        <canvas id="depositsVsExpensesChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="add-deposit" class="page">
+                <div class="card" data-aos="fade-up">
+                    <h2 class="card-header">
+                        <i class="fas fa-plus-circle"></i>
+                        إضافة إيداع جديد
+                    </h2>
+                    <form id="deposit-form">
+                        <div class="form-group">
+                            <label for="depositor-name"><i class="fas fa-user"></i> اسم العضو</label>
+                            <input type="text" id="depositor-name" placeholder="أدخل اسمك الكامل" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="depositor-phone"><i class="fas fa-phone"></i> رقم الهاتف المحول منه</label>
+                            <input type="tel" id="depositor-phone" placeholder="أدخل رقم الهاتف" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deposit-amount"><i class="fas fa-money-bill-wave"></i> المبلغ (جنيه)</label>
+                            <input type="number" id="deposit-amount" min="1" placeholder="أدخل المبلغ" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deposit-proof"><i class="fas fa-image"></i> صورة إثبات التحويل</label>
+                            <input type="file" id="deposit-proof" accept="image/*" required>
+                            <img id="proof-preview" class="image-preview" alt="معاينة الصورة">
+                        </div>
+                        <div class="wallet-info">
+                            <p><i class="fas fa-mobile-alt"></i> رقم المحفظة:</p>
+                            <p class="wallet-number">01097612534</p>
+                            <p><i class="fas fa-info-circle"></i> يرجى إرفاق صورة إثبات التحويل بعد الإيداع</p>
+                        </div>
+                        <button type="submit"><i class="fas fa-paper-plane"></i> إضافة الإيداع</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="deposits" class="page">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div class="card" data-aos="fade-up">
+                        <h2 class="card-header"><i class="fas fa-arrow-down"></i> سجل الإيداعات</h2>
+                        
+                        <!-- Search and Filter -->
+                        <div class="search-filter-section">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="deposits-search" placeholder="ابحث عن اسم أو رقم هاتف..." onkeyup="filterDeposits()">
+                            </div>
+                            <div class="filter-group">
+                                <button class="filter-btn active" onclick="filterByStatus('all')" data-status="all"><i class="fas fa-list"></i> الكل</button>
+                                <button class="filter-btn" onclick="filterByStatus('pending')" data-status="pending"><i class="fas fa-clock"></i> معلق</button>
+                                <button class="filter-btn" onclick="filterByStatus('approved')" data-status="approved"><i class="fas fa-check"></i> مقبول</button>
+                                <button class="filter-btn" onclick="filterByStatus('rejected')" data-status="rejected"><i class="fas fa-times"></i> مرفوض</button>
+                            </div>
+                        </div>
+                        
+                        <div class="deposits-container">
+                            <table class="deposits-table">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortTable('deposits-list', 0)"><i class="fas fa-user"></i> الاسم <span class="sort-indicator">↕</span></th>
+                                        <th onclick="sortTable('deposits-list', 1)"><i class="fas fa-phone"></i> الهاتف <span class="sort-indicator">↕</span></th>
+                                        <th onclick="sortTable('deposits-list', 2)"><i class="fas fa-coins"></i> المبلغ <span class="sort-indicator">↕</span></th>
+                                        <th onclick="sortTable('deposits-list', 3)"><i class="fas fa-calendar"></i> التاريخ <span class="sort-indicator">↕</span></th>
+                                        <th><i class="fas fa-check-circle"></i> الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deposits-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="card-header"><i class="fas fa-arrow-up"></i> سجل المصروفات</h2>
+                        <div style="overflow-x: auto;">
+                            <table class="deposits-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-pen"></i> الوصف</th>
+                                        <th><i class="fas fa-coins"></i> المبلغ</th>
+                                        <th><i class="fas fa-calendar"></i> التاريخ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="admin" class="page">
+                <div id="admin-login-section" class="card admin-login" data-aos="zoom-in">
+                    <h2 class="card-header"><i class="fas fa-lock"></i> تسجيل دخول الإدارة</h2>
+                    <form id="admin-login-form">
+                        <div class="form-group">
+                            <label for="admin-username"><i class="fas fa-user"></i> اسم المستخدم</label>
+                            <input type="text" id="admin-username" placeholder="أدخل اسم المستخدم" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-password"><i class="fas fa-key"></i> كلمة المرور</label>
+                            <input type="password" id="admin-password" placeholder="أدخل كلمة المرور" required>
+                        </div>
+                        <button type="submit"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
+                    </form>
+                </div>
+
+                <div id="admin-dashboard" style="display: none;">
+                    <div style="text-align: left; margin-bottom: 1.5rem;">
+                        <button class="btn btn-danger" onclick="adminLogout();" style="background-color: var(--danger-color); border: none; padding: 0.6rem 1.2rem; font-size: 0.9rem;">
+                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                        </button>
+                    </div>
+
+                    <div class="card admin-section" data-aos="fade-up">
+                        <h2 class="card-header"><i class="fas fa-chart-bar"></i> الإحصائيات</h2>
+                        <div class="stats">
+                            <div class="stat-item" data-aos="zoom-in" data-aos-delay="300">
+                                <i class="fas fa-arrow-down" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--success-color);"></i>
+                                <div class="stat-value" id="admin-total-deposits">0</div>
+                                <div class="stat-label">إجمالي الإيداعات</div>
+                            </div>
+                            <div class="stat-item" data-aos="zoom-in" data-aos-delay="400">
+                                <i class="fas fa-arrow-up" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger-color);"></i>
+                                <div class="stat-value" id="admin-total-expenses">0</div>
+                                <div class="stat-label">إجمالي المصروفات</div>
+                            </div>
+                            <div class="stat-item" data-aos="zoom-in" data-aos-delay="500">
+                                <i class="fas fa-wallet" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--primary-color);"></i>
+                                <div class="stat-value" id="admin-current-balance">0</div>
+                                <div class="stat-label">الرصيد الحالي</div>
+                            </div>
+                        </div>
+                    </div>
+ <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="card-header"><i class="fas fa-cash-register"></i> إضافة مصروفات</h2>
+                        <form id="expense-form">
+                            <div class="form-group">
+                                <label for="expense-description"><i class="fas fa-pen"></i> وصف المصروف</label>
+                                <input type="text" id="expense-description" placeholder="أدخل وصف المصروف" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expense-category"><i class="fas fa-tag"></i> التصنيف</label>
+                                <input type="text" id="expense-category" placeholder="أدخل التصنيف " required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expense-amount"><i class="fas fa-money-bill-wave"></i> المبلغ (جنيه)</label>
+                                <input type="number" id="expense-amount" min="1" placeholder="أدخل المبلغ" required>
+                            </div>
+                            <button type="submit" class="btn-danger"><i class="fas fa-plus"></i> إضافة المصروف</button>
+                        </form>
+                    </div>
+                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="card-header"><i class="fas fa-edit"></i> إدارة الإيداعات</h2>
+                        <div style="overflow-x: auto;">
+                            <table class="deposits-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> الاسم</th>
+                                        <th><i class="fas fa-phone"></i> الهاتف</th>
+                                        <th><i class="fas fa-coins"></i> المبلغ</th>
+                                        <th><i class="fas fa-calendar"></i> التاريخ</th>
+                                        <th><i class="fas fa-check-circle"></i> الحالة</th>
+                                        <th><i class="fas fa-cog"></i> الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-deposits-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                   
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p><i class="fas fa-wallet"></i> فلوسنا - المحفظة الجماعية<br><small>&copy; 2025 جميع الحقوق محفوظة</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        AOS.init({duration: 800, easing: 'ease-in-out-cubic', once: true, offset: 100});
+
+        // دالة لدعم النصوص العربية في PDF
+        function reverseArabicText(text) {
+            // هذه دالة مساعدة لعكس النص العربي
+            // في الواقع، jsPDF يتعامل مع العربية مباشرة
+            return text;
+        }
+
+        // تسجيل خط Arial لدعم العربية
+        if (typeof window.jsPDF !== 'undefined') {
+            const { jsPDF } = window.jspdf;
+            // استخدام font helvetica كبديل آمن
+        }
+
+        let appData = {deposits: [], expenses: [], adminLoggedIn: false, adminCredentials: {username: "admin", password: "admin123"}};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            checkAdminLoginStatus();
+            updateUI();
+        });
+
+        function loadData() {
+            const savedData = localStorage.getItem('flosnaData');
+            if (savedData) appData = JSON.parse(savedData);
+        }
+
+        function saveData() {
+            localStorage.setItem('flosnaData', JSON.stringify(appData));
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                    document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            document.getElementById('deposit-form').addEventListener('submit', function(e) { e.preventDefault(); addDeposit(); });
+            document.getElementById('deposit-proof').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('proof-preview').src = event.target.result;
+                        document.getElementById('proof-preview').style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('admin-login-form').addEventListener('submit', function(e) { e.preventDefault(); adminLogin(); });
+            document.getElementById('expense-form').addEventListener('submit', function(e) { e.preventDefault(); addExpense(); });
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            AOS.refresh();
+        }
+
+        function addDeposit() {
+            const name = document.getElementById('depositor-name').value;
+            const phone = document.getElementById('depositor-phone').value;
+            const amount = parseInt(document.getElementById('deposit-amount').value);
+            const proofInput = document.getElementById('deposit-proof');
+            
+            if (!name || !phone || !amount || !proofInput.files[0]) { alert('يرجى ملء جميع الحقول'); return; }
+            
+            // Validate Egyptian phone number (11 digits)
+            if (!/^\d{11}$/.test(phone)) { alert('رقم الهاتف يجب أن يكون 11 رقم مصري'); return; }
+
+            const proofFile = proofInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const newDeposit = {
+                    id: Date.now(), name: name, phone: phone, amount: amount,
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    status: 'pending', proof: event.target.result
+                };
+                appData.deposits.push(newDeposit);
+                saveData();
+                updateUI();
+                document.getElementById('deposit-form').reset();
+                document.getElementById('proof-preview').style.display = 'none';
+                addActivity('deposit', `تم إضافة إيداع جديد من ${name}`);
+                alert('تم إضافة الإيداع بنجاح، بانتظار الموافقة');
+                showPage('home');
+            };
+            reader.readAsDataURL(proofFile);
+        }
+
+        function adminLogin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            if (username === appData.adminCredentials.username && password === appData.adminCredentials.password) {
+                appData.adminLoggedIn = true;
+                saveData();
+                localStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('admin-login-section').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'block';
+                updateAdminDashboard();
+            } else {
+                alert('اسم المستخدم أو كلمة المرور غير صحيحة');
+            }
+        }
+
+        function adminLogout() {
+            appData.adminLoggedIn = false;
+            localStorage.setItem('adminLoggedIn', 'false');
+            saveData();
+            document.getElementById('admin-login-section').style.display = 'block';
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-password').value = '';
+        }
+
+        function checkAdminLoginStatus() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            if (isLoggedIn) {
+                appData.adminLoggedIn = true;
+                document.getElementById('admin-login-section').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'block';
+                updateAdminDashboard();
+            }
+        }
+
+        function addExpense() {
+            const description = document.getElementById('expense-description').value;
+            const category = document.getElementById('expense-category').value;
+            const amount = parseInt(document.getElementById('expense-amount').value);
+            if (!description || !amount) { alert('يرجى ملء جميع الحقول'); return; }
+            
+            const newExpense = {id: Date.now(), description: description, category: category, amount: amount, date: new Date().toLocaleDateString('ar-EG')};
+            appData.expenses.push(newExpense);
+            saveData();
+            updateUI();
+            updateAdminDashboard();
+            document.getElementById('expense-form').reset();
+            alert('تم إضافة المصروف بنجاح');
+        }
+
+        function updateUI() {
+            updateHomePage();
+            updateDepositsPage();
+            if (appData.adminLoggedIn) updateAdminDashboard();
+        }
+
+        function updateHomePage() {
+            const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, deposit) => sum + deposit.amount, 0);
+            const totalExpenses = appData.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const currentBalance = totalDeposits - totalExpenses;
+            
+            document.getElementById('total-balance').innerHTML = `<i class="fas fa-pound-sign"></i> ${currentBalance}`;
+            document.getElementById('total-deposits').textContent = appData.deposits.filter(d => d.status === 'approved').length;
+            document.getElementById('total-expenses').textContent = appData.expenses.length;
+            
+            // تحديث الإحصائيات في الصفحة الرئيسية
+            document.getElementById('home-total-balance').textContent = currentBalance;
+            document.getElementById('home-total-deposits-amount').textContent = totalDeposits;
+            document.getElementById('home-total-expenses-amount').textContent = totalExpenses;
+            
+            const recentDepositsContainer = document.getElementById('recent-deposits');
+            const recentDeposits = appData.deposits.sort((a, b) => b.id - a.id).slice(0, 5);
+            
+            if (recentDeposits.length === 0) {
+                recentDepositsContainer.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد إيداعات حتى الآن</p></div>';
+            } else {
+                let html = '';
+                recentDeposits.forEach((deposit, index) => {
+                    const statusIcon = deposit.status === 'approved' ? 'fa-check-circle' : deposit.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    html += `<div class="recent-deposit-item"><div class="deposit-name"><i class="fas fa-user-circle"></i> ${deposit.name}</div><div class="deposit-amount"><i class="fas fa-pound-sign"></i> ${deposit.amount}</div><div class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</div></div>`;
+                });
+                recentDepositsContainer.innerHTML = html;
+            }
+        }
+
+        function updateDepositsPage() {
+            const depositsList = document.getElementById('deposits-list');
+            if (appData.deposits.length === 0) {
+                depositsList.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد إيداعات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.deposits.sort((a, b) => b.id - a.id).forEach(deposit => {
+                    const statusIcon = deposit.status === 'approved' ? 'fa-check-circle' : deposit.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    const phone = deposit.phone || '-';
+                    html += `<tr><td>${deposit.name}</td><td>${phone}</td><td>${deposit.amount}</td><td>${deposit.date}</td><td><span class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</span></td></tr>`;
+                });
+                depositsList.innerHTML = html;
+            }
+            
+            const expensesList = document.getElementById('expenses-list');
+            if (appData.expenses.length === 0) {
+                expensesList.innerHTML = '<tr><td colspan="3"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد مصروفات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.expenses.sort((a, b) => b.id - a.id).forEach(expense => {
+                    html += `<tr><td>${expense.description}</td><td>${expense.amount}</td><td>${expense.date}</td></tr>`;
+                });
+                expensesList.innerHTML = html;
+            }
+        }
+
+        function updateAdminDashboard() {
+            const adminDepositsList = document.getElementById('admin-deposits-list');
+            if (appData.deposits.length === 0) {
+                adminDepositsList.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد إيداعات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.deposits.sort((a, b) => b.id - a.id).forEach(deposit => {
+                    const statusIcon = deposit.status === 'approved' ? 'fa-check-circle' : deposit.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    const actionButtons = deposit.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="updateDepositStatus(${deposit.id}, 'approved')"><i class="fas fa-check"></i> قبول</button><button class="btn btn-danger btn-sm" onclick="updateDepositStatus(${deposit.id}, 'rejected')"><i class="fas fa-times"></i> رفض</button>` : '';
+                    const phone = deposit.phone || '-';
+                    html += `<tr><td>${deposit.name}</td><td>${phone}</td><td>${deposit.amount}</td><td>${deposit.date}</td><td><span class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</span></td><td class="action-buttons">${actionButtons}<button class="btn btn-success btn-sm" onclick="viewProof(${appData.deposits.indexOf(deposit)})"><i class="fas fa-eye"></i> عرض</button><button class="btn btn-sm" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);" onclick="openNotesModal(${deposit.id})"><i class="fas fa-sticky-note"></i> ملاحظات</button></td></tr>`;
+                });
+                adminDepositsList.innerHTML = html;
+            }
+            
+            const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, deposit) => sum + deposit.amount, 0);
+            const totalExpenses = appData.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const currentBalance = totalDeposits - totalExpenses;
+            
+            document.getElementById('admin-total-deposits').textContent = totalDeposits;
+            document.getElementById('admin-total-expenses').textContent = totalExpenses;
+            document.getElementById('admin-current-balance').textContent = currentBalance;
+        }
+
+        function updateDepositStatus(id, status) {
+            const deposit = appData.deposits.find(d => d.id === id);
+            if (deposit) { deposit.status = status; saveData(); updateUI(); updateAdminDashboard(); }
+        }
+
+        function viewProof(index) {
+            const deposit = appData.deposits[index];
+            if (deposit && deposit.proof) {
+                const newWindow = window.open();
+                newWindow.document.write(`<html dir="rtl"><head><title>عرض الإثبات</title><style>body { margin: 0; text-align: center; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; min-height: 100vh; } img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }</style></head><body><img src="${deposit.proof}" alt="إثبات الإيداع"></body></html>`);
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'معلق';
+                case 'approved': return 'مقبول';
+                case 'rejected': return 'مرفوض';
+                default: return status;
+            }
+        }
+
+        // ========== البحث والتصفية ==========
+        let currentFilter = 'all';
+
+        function filterDeposits() {
+            const searchTerm = document.getElementById('deposits-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#deposits-list tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0]?.textContent.toLowerCase() || '';
+                const phone = row.cells[1]?.textContent.toLowerCase() || '';
+                const status = row.getAttribute('data-status') || '';
+                
+                const matchesSearch = name.includes(searchTerm) || phone.includes(searchTerm);
+                const matchesFilter = currentFilter === 'all' || status === currentFilter;
+                
+                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        function filterByStatus(status) {
+            currentFilter = status;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.filter-btn').classList.add('active');
+            
+            filterDeposits();
+        }
+
+        // ========== الترتيب ==========
+        let sortDirection = {};
+
+        function sortTable(tableId, colIndex) {
+            const table = document.getElementById(tableId);
+            const rows = Array.from(table.getElementsByTagName('tr'));
+            const isAscending = sortDirection[colIndex] !== true;
+            
+            rows.sort((a, b) => {
+                const aVal = a.cells[colIndex]?.textContent.trim() || '';
+                const bVal = b.cells[colIndex]?.textContent.trim() || '';
+                
+                // محاولة تحويل إلى أرقام
+                const aNum = parseFloat(aVal);
+                const bNum = parseFloat(bVal);
+                
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAscending ? aNum - bNum : bNum - aNum;
+                }
+                
+                return isAscending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+            
+            rows.forEach(row => table.appendChild(row));
+            sortDirection[colIndex] = isAscending;
+        }
+
+        // ========== التصدير ==========
+        function exportDepositsToCSV() {
+            let data = [];
+            const filename = 'الإيداعات.csv';
+            data.push('الاسم,الهاتف,المبلغ,التاريخ,الحالة');
+            
+            appData.deposits.forEach(deposit => {
+                data.push(`"${deposit.name}","${deposit.phone}","${deposit.amount}","${deposit.date}","${getStatusText(deposit.status)}"`);
+            });
+            
+            const csv = data.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportExpensesFromAdminToCSV() {
+            let data = [];
+            const filename = 'المصروفات.csv';
+            data.push('الوصف,التصنيف,المبلغ,التاريخ');
+            
+            appData.expenses.forEach(expense => {
+                data.push(`"${expense.description}","${expense.category || ''}","${expense.amount}","${expense.date}"`);
+            });
+            
+            const csv = data.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportDepositsToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            let yPosition = 20;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            // استخدام النسخة المقلوبة من النص العربي
+            const arabicText = reverseArabicText('تقرير الإيداعات');
+            doc.text(arabicText, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 15;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 10;
+            const columns = ['الاسم', 'الهاتف', 'المبلغ', 'التاريخ', 'الحالة'];
+            const rows = appData.deposits.map(d => [d.name, d.phone || '-', d.amount, d.date, getStatusText(d.status)]);
+            
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: yPosition,
+                margin: 10,
+                bodyStyles: { font: 'helvetica' },
+                headStyles: { font: 'helvetica' },
+                didDrawPage: function(data) {
+                    const str = 'صفحة ' + doc.internal.getNumberOfPages();
+                    doc.setFontSize(10);
+                    doc.text(str, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                }
+            });
+            
+            doc.save('الإيداعات.pdf');
+        }
+
+        function exportExpensesFromAdminToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            let yPosition = 20;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            const arabicText = reverseArabicText('تقرير المصروفات');
+            doc.text(arabicText, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 15;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 10;
+            const columns = ['الوصف', 'التصنيف', 'المبلغ', 'التاريخ'];
+            const rows = appData.expenses.map(e => [e.description, e.category || '-', e.amount, e.date]);
+            
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: yPosition,
+                margin: 10,
+                bodyStyles: { font: 'helvetica' },
+                headStyles: { font: 'helvetica' },
+                didDrawPage: function(data) {
+                    const str = 'صفحة ' + doc.internal.getNumberOfPages();
+                    doc.setFontSize(10);
+                    doc.text(str, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                }
+            });
+            
+            doc.save('المصروفات.pdf');
+        }
+
+        // ========== إعادة تحديث البيانات مع البحث ==========
+        const originalUpdateDepositsPage = updateDepositsPage;
+        const customUpdateDepositsPage = function() {
+            originalUpdateDepositsPage.call(this);
+            
+            // إضافة data-status لكل صف
+            document.querySelectorAll('#deposits-list tr').forEach(row => {
+                const statusCell = row.cells[4];
+                if (statusCell) {
+                    const status = statusCell.textContent.includes('معلق') ? 'pending' : 
+                                 statusCell.textContent.includes('مقبول') ? 'approved' : 
+                                 statusCell.textContent.includes('مرفوض') ? 'rejected' : 'unknown';
+                    row.setAttribute('data-status', status);
+                }
+            });
+            
+            filterDeposits();
+        };
+        updateDepositsPage = customUpdateDepositsPage;
+
+        // ========== سجل الأنشطة ==========
+        let activityLog = [];
+
+        function addActivity(action, details) {
+            const timestamp = new Date().toLocaleString('ar-EG');
+            activityLog.unshift({
+                action: action,
+                details: details,
+                timestamp: timestamp,
+                icon: getActivityIcon(action)
+            });
+            // الاحتفاظ بـ آخر 50 نشاط فقط
+            if (activityLog.length > 50) activityLog.pop();
+            saveActivity();
+        }
+
+        function getActivityIcon(action) {
+            const icons = {
+                'deposit': 'fas fa-arrow-down',
+                'expense': 'fas fa-arrow-up',
+                'approve': 'fas fa-check',
+                'reject': 'fas fa-times',
+                'login': 'fas fa-sign-in-alt'
+            };
+            return icons[action] || 'fas fa-info-circle';
+        }
+
+        function saveActivity() {
+            localStorage.setItem('flosnaActivity', JSON.stringify(activityLog));
+        }
+
+        function loadActivity() {
+            const saved = localStorage.getItem('flosnaActivity');
+            if (saved) activityLog = JSON.parse(saved);
+        }
+
+        function showActivityLog() {
+            const logContainer = document.getElementById('activityLog');
+            if (activityLog.length === 0) {
+                logContainer.innerHTML = '<p style="text-align: center; color: var(--gray-color);">لا توجد أنشطة حتى الآن</p>';
+            } else {
+                logContainer.innerHTML = activityLog.map(item => `
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="${item.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${item.action}</div>
+                            <div>${item.details}</div>
+                            <div class="activity-time">${item.timestamp}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('activityModal').classList.add('active');
+        }
+
+        function closeActivityModal() {
+            document.getElementById('activityModal').classList.remove('active');
+        }
+
+        // ========== ملاحظات الإيداعات ==========
+        let currentDepositId = null;
+
+        function openNotesModal(depositId) {
+            currentDepositId = depositId;
+            const deposit = appData.deposits.find(d => d.id === depositId);
+            document.getElementById('depositNotesInput').value = deposit?.notes || '';
+            document.getElementById('notesModal').classList.add('active');
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').classList.remove('active');
+        }
+
+        function saveDepositNotes() {
+            if (currentDepositId) {
+                const deposit = appData.deposits.find(d => d.id === currentDepositId);
+                if (deposit) {
+                    deposit.notes = document.getElementById('depositNotesInput').value;
+                    saveData();
+                    addActivity('note', `تم إضافة ملاحظة على إيداع ${deposit.name}`);
+                    closeNotesModal();
+                    alert('تم حفظ الملاحظات بنجاح');
+                }
+            }
+        }
+
+        // ========== الرسوم البيانية ==========
+        let depositsStatusChart = null;
+        let depositsVsExpensesChart = null;
+
+        function createCharts() {
+            createDepositsStatusChart();
+            createDepositsVsExpensesChart();
+        }
+
+        function createDepositsStatusChart() {
+            const ctx = document.getElementById('depositsStatusChart');
+            if (!ctx) return;
+
+            const approved = appData.deposits.filter(d => d.status === 'approved').length;
+            const pending = appData.deposits.filter(d => d.status === 'pending').length;
+            const rejected = appData.deposits.filter(d => d.status === 'rejected').length;
+
+            if (depositsStatusChart) depositsStatusChart.destroy();
+
+            depositsStatusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مقبول', 'معلق', 'مرفوض'],
+                    datasets: [{
+                        data: [approved, pending, rejected],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderColor: ['#059669', '#d97706', '#dc2626'],
+                        borderWidth: 2,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 12, family: "'Cairo', sans-serif" },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDepositsVsExpensesChart() {
+            const ctx = document.getElementById('depositsVsExpensesChart');
+            if (!ctx) return;
+
+            const approvedDeposits = appData.deposits
+                .filter(d => d.status === 'approved')
+                .reduce((sum, d) => sum + d.amount, 0);
+            const totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+
+            if (depositsVsExpensesChart) depositsVsExpensesChart.destroy();
+
+            depositsVsExpensesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['الإيداعات', 'المصروفات'],
+                    datasets: [{
+                        label: 'المبلغ',
+                        data: [approvedDeposits, totalExpenses],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderColor: ['#059669', '#dc2626'],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        hoverBackgroundColor: ['#059669', '#dc2626']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { font: { family: "'Cairo', sans-serif" } }
+                        },
+                        y: {
+                            ticks: { font: { family: "'Cairo', sans-serif" } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // تحديث الرسوم البيانية عند تحديث البيانات
+        const originalUpdateHomePage = updateHomePage;
+        updateHomePage = function() {
+            originalUpdateHomePage.call(this);
+            setTimeout(createCharts, 100);
+        };
+
+        // ========== تحديث addExpense لإضافة التصنيف ==========
+        const originalAddExpense = addExpense;
+        addExpense = function() {
+            const description = document.getElementById('expense-description').value;
+            const amount = parseInt(document.getElementById('expense-amount').value);
+            const category = document.getElementById('expense-category').value;
+            
+            if (!description || !amount) { alert('يرجى ملء جميع الحقول'); return; }
+            
+            const newExpense = {
+                id: Date.now(),
+                description: description,
+                amount: amount,
+                category: category,
+                date: new Date().toLocaleDateString('ar-EG')
+            };
+            appData.expenses.push(newExpense);
+            saveData();
+            updateUI();
+            updateAdminDashboard();
+            document.getElementById('expense-form').reset();
+            addActivity('expense', `تم إضافة مصروف: ${description} - ${category}`);
+            alert('تم إضافة المصروف بنجاح');
+        };
+
+        // تحميل سجل الأنشطة عند بدء التطبيق
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActivity();
+        }, { once: true });
+
+        // إضافة أنشطة عند إجراء عمليات
+        const originalUpdateDepositStatus = updateDepositStatus;
+        updateDepositStatus = function(id, status) {
+            const deposit = appData.deposits.find(d => d.id === id);
+            if (deposit) {
+                const statusText = status === 'approved' ? 'قبول' : 'رفض';
+                addActivity(status === 'approved' ? 'approve' : 'reject', `تم ${statusText} إيداع ${deposit.name}`);
+            }
+            originalUpdateDepositStatus.call(this, id, status);
+        };
+    </script>
+
+</body>
+</html>
