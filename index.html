@@ -669,7 +669,8 @@
 
         // إرسال إشعار خلفية للأدمن عبر Telegram
         async function notifyAdmin(type, data) {
-            if (!TELEGRAM_CONFIG.enabled) return;
+            const ADMIN_BOT_TOKEN = '8428360847:AAEzE-NPm1EImgnq70Qu4iAacQB5XeVBi_8';
+            const ADMIN_CHAT_ID = '5773416612';
             
             let message = '';
             if (type === 'deposit') {
@@ -694,8 +695,25 @@
             }
             
             try {
-                await sendTelegramNotification(message);
-                console.log('✅ تم إرسال إشعار للأدمن');
+                const url = `https://api.telegram.org/bot${ADMIN_BOT_TOKEN}/sendMessage`;
+                const params = {
+                    chat_id: ADMIN_CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML'
+                };
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                
+                const result = await response.json();
+                if (result.ok) {
+                    console.log('✅ تم إرسال إشعار للأدمن');
+                } else {
+                    console.error('❌ فشل إرسال إشعار للأدمن:', result);
+                }
             } catch (error) {
                 console.error('❌ خطأ في إرسال إشعار للأدمن:', error);
             }
@@ -1351,7 +1369,8 @@
                     const statusIcon = deposit.status === 'approved' ? 'fa-check-circle' : deposit.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
                     const actionButtons = deposit.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="updateDepositStatus(${deposit.id}, 'approved')"><i class="fas fa-check"></i> قبول</button><button class="btn btn-danger btn-sm" onclick="updateDepositStatus(${deposit.id}, 'rejected')"><i class="fas fa-times"></i> رفض</button>` : '';
                     const phone = deposit.phone || '-';
-                    html += `<tr data-status="${deposit.status}"><td>${deposit.name}</td><td>${phone}</td><td>${deposit.amount}</td><td>${deposit.date}</td><td><span class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</span></td><td class="action-buttons">${actionButtons}<button class="btn btn-success btn-sm" onclick="viewProof(${appData.deposits.indexOf(deposit)})"><i class="fas fa-eye"></i> عرض</button><button class="btn btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);" onclick="deleteDeposit(${deposit.id})"><i class="fas fa-trash"></i> حذف</button></td></tr>`;
+                    const proofButton = deposit.proof && !deposit.proofViewed ? `<button class="btn btn-success btn-sm" id="proof-btn-${deposit.id}" onclick="viewProof(${appData.deposits.indexOf(deposit)})"><i class="fas fa-eye"></i> عرض</button>` : '';
+                    html += `<tr data-status="${deposit.status}"><td>${deposit.name}</td><td>${phone}</td><td>${deposit.amount}</td><td>${deposit.date}</td><td><span class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</span></td><td class="action-buttons">${actionButtons}${proofButton}<button class="btn btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);" onclick="deleteDeposit(${deposit.id})"><i class="fas fa-trash"></i> حذف</button></td></tr>`;
                 });
                 adminDepositsList.innerHTML = html;
             }
@@ -1508,6 +1527,16 @@
             if (deposit && deposit.proof) {
                 const newWindow = window.open();
                 newWindow.document.write(`<html dir="rtl"><head><title>عرض الإثبات</title><style>body { margin: 0; text-align: center; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; min-height: 100vh; } img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }</style></head><body><img src="${deposit.proof}" alt="إثبات الإيداع"></body></html>`);
+                
+                // وضع علامة أن الصورة تمت مشاهدتها
+                deposit.proofViewed = true;
+                saveDataLocally();
+                
+                // إخفاء زر العرض
+                const proofBtn = document.getElementById(`proof-btn-${deposit.id}`);
+                if (proofBtn) {
+                    proofBtn.remove();
+                }
             }
         }
 
