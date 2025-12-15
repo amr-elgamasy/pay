@@ -31,6 +31,8 @@ function doGet(e) {
         return deleteExpense(data);
       } else if (action === 'deleteWithdrawal') {
         return deleteWithdrawal(data);
+      } else if (action === 'deleteAll') {
+        return deleteAllData();
       }
       
       return createResponse({status: 'error', message: 'Unknown action: ' + action});
@@ -384,4 +386,35 @@ function deleteWithdrawal(data) {
   }
   
   return createResponse({status: 'error', message: 'Withdrawal not found: ' + data.ID});
+}
+
+// ============================================================
+// 🗑️ حذف جميع البيانات من كل الشيتات
+// ============================================================
+function deleteAllData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = [
+    'الإيداعات_المعلقة', 'الإيداعات_المقبولة', 'الإيداعات_المرفوضة',
+    'المصروفات',
+    'السحوبات_المعلقة', 'السحوبات_المقبولة', 'السحوبات_المرفوضة'
+  ];
+  
+  try {
+    for (const sheetName of sheets) {
+      const sheet = ss.getSheetByName(sheetName);
+      if (!sheet) continue;
+      
+      const lastRow = sheet.getLastRow();
+      if (lastRow > 1) {
+        // حذف كل الصفوف ما عدا صف العناوين
+        sheet.deleteRows(2, lastRow - 1);
+      }
+    }
+    
+    Logger.log('✅ All data deleted from all sheets');
+    return createResponse({status: 'success', message: 'All data deleted successfully'});
+  } catch (error) {
+    Logger.log('❌ Error deleting all data: ' + error.toString());
+    return createResponse({status: 'error', message: error.toString()});
+  }
 }
