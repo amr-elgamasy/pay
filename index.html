@@ -343,6 +343,11 @@
                     </div>
                     
                     <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="card-header"><i class="fas fa-paper-plane"></i> اختبار إشعارات Telegram</h2>
+                        <button type="button" class="btn" onclick="testTelegram()" style="width: 100%;"><i class="fas fa-telegram"></i> إرسال رسالة اختبار</button>
+                    </div>
+                    
+                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="150">
                         <h2 class="card-header"><i class="fas fa-cash-register"></i> إضافة مصروفات</h2>
                         <form id="expense-form">
                             <div class="form-group">
@@ -1277,12 +1282,13 @@
                     
                     // إرسال إشعار Telegram عند الموافقة فقط
                     if (status === 'approved' && oldStatus === 'pending') {
-                        const message = `🎉 إيداع مؤكد ✅
+                        const message = `<b>🎉 إيداع مؤكد ✅</b>
 
-👤 الاسم: ${deposit.name}
-📱 الهاتف: ${deposit.phone}
-💰 المبلغ: ${deposit.amount} جنيه
-📅 التاريخ: ${deposit.date}`;
+<b>👤 الاسم:</b> ${deposit.name}
+<b>📱 الهاتف:</b> ${deposit.phone}
+<b>💰 المبلغ:</b> ${deposit.amount} جنيه
+<b>📅 التاريخ:</b> ${deposit.date}`;
+                        console.log('📤 محاولة إرسال رسالة Telegram للإيداع...');
                         sendTelegramNotification(message).catch(err => {
                             console.error('خطأ في إرسال إشعار Telegram:', err);
                         });
@@ -1315,13 +1321,14 @@
                     
                     // إرسال إشعار Telegram عند الموافقة فقط
                     if (status === 'approved' && oldStatus === 'pending') {
-                        const message = `💸 سحب مؤكد ✅
+                        const message = `<b>💸 سحب مؤكد ✅</b>
 
-👤 الاسم: ${withdrawal.name}
-📱 الهاتف: ${withdrawal.phone}
-💰 المبلغ: ${withdrawal.amount} جنيه
-📝 السبب: ${withdrawal.reason}
-📅 التاريخ: ${withdrawal.date}`;
+<b>👤 الاسم:</b> ${withdrawal.name}
+<b>📱 الهاتف:</b> ${withdrawal.phone}
+<b>💰 المبلغ:</b> ${withdrawal.amount} جنيه
+<b>📝 السبب:</b> ${withdrawal.reason}
+<b>📅 التاريخ:</b> ${withdrawal.date}`;
+                        console.log('📤 محاولة إرسال رسالة Telegram للسحب...');
                         sendTelegramNotification(message).catch(err => {
                             console.error('خطأ في إرسال إشعار Telegram:', err);
                         });
@@ -1342,6 +1349,23 @@
             if (deposit && deposit.proof) {
                 const newWindow = window.open();
                 newWindow.document.write(`<html dir="rtl"><head><title>عرض الإثبات</title><style>body { margin: 0; text-align: center; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; min-height: 100vh; } img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }</style></head><body><img src="${deposit.proof}" alt="إثبات الإيداع"></body></html>`);
+            }
+        }
+
+        // اختبار Telegram
+        async function testTelegram() {
+            const message = `<b>🧪 رسالة اختبار من فلوسنا</b>
+
+<b>📋 الحالة:</b> Telegram يعمل بشكل صحيح ✅
+<b>⏰ الوقت:</b> ${new Date().toLocaleString('ar-EG')}
+
+<i>إذا وصلتك هذه الرسالة، فإن الإشعارات تعمل بنجاح!</i>`;
+            
+            try {
+                await sendTelegramNotification(message);
+                showToast('تم إرسال رسالة الاختبار، تحقق من Telegram', 'success');
+            } catch (error) {
+                showToast('فشل إرسال رسالة الاختبار', 'error');
             }
         }
 
