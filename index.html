@@ -750,7 +750,7 @@
                     id: d.ID || d.id,
                     name: d.الاسم || d.name || '',
                     phone: d.الهاتف || d.phone || '',
-                    amount: parseInt(d.المبلغ || d.amount || 0),
+                    amount: parseAmount(d.المبلغ || d.amount),
                     date: d.التاريخ || d.date || '',
                     status: translateStatus(d.الحالة || d.status || 'pending'),
                     proof: d.صورة_التحويل || d.proof || ''
@@ -760,7 +760,7 @@
                     id: e.ID || e.id,
                     description: e.الوصف || e.description || '',
                     category: e.الفئة || e.category || '',
-                    amount: parseInt(e.المبلغ || e.amount || 0),
+                    amount: parseAmount(e.المبلغ || e.amount),
                     date: e.التاريخ || e.date || ''
                 }));
                 
@@ -769,7 +769,7 @@
                     date: w.التاريخ || w.date || '',
                     name: w.الاسم || w.name || '',
                     phone: w.الهاتف || w.phone || '',
-                    amount: parseInt(w.المبلغ || w.amount || 0),
+                    amount: parseAmount(w.المبلغ || w.amount),
                     reason: w.السبب || w.reason || '',
                     status: translateStatus(w.الحالة || w.status || 'pending')
                 }));
@@ -805,6 +805,15 @@
                 'مرفوض': 'rejected'
             };
             return statusMap[arabicStatus] || arabicStatus;
+        }
+        
+        // تحويل المبلغ إلى رقم بشكل آمن
+        function parseAmount(value) {
+            if (value === null || value === undefined || value === '') return 0;
+            // إزالة أي أحرف غير رقمية وتحويل إلى رقم
+            const cleaned = String(value).replace(/[^\d]/g, '');
+            const num = parseInt(cleaned, 10);
+            return isNaN(num) ? 0 : num;
         }
 
         // حفظ البيانات محلياً (كنسخة احتياطية)
