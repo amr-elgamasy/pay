@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فلوسنا - المحفظة الجماعية</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <!-- Chart.js for Charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Arabic Font Support for jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <link rel="stylesheet" href="styel.css">
+
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-wallet"></i>
+                فلوسنا
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> الرئيسية</a></li>
+                    <li><a href="#" class="nav-link" data-page="deposits"><i class="fas fa-list"></i> السجل</a></li>
+                    <li><a href="#" class="nav-link" data-page="admin"><i class="fas fa-cog"></i> الإدارة</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section id="home" class="page active">
+                <div class="card balance-card" data-aos="fade-up">
+                    <h2 class="card-header" style="border: none; color: var(--dark-color); justify-content: center;">
+                        <i class="fas fa-chart-line"></i>
+                        الرصيد الإجمالي
+                    </h2>
+                    <div class="balance-amount" id="total-balance">
+                        <i class="fas fa-pound-sign"></i> 0
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn" onclick="showPage('add-deposit'); document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));">
+                            <i class="fas fa-plus"></i> إيداع جديد
+                        </button>
+                        <button class="btn" style="background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);" onclick="showPage('add-withdrawal'); document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));">
+                            <i class="fas fa-minus"></i> سحب جديد
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="card-header">
+                        <i class="fas fa-chart-bar"></i>
+                        الإحصائيات والرصيد الإجمالي
+                    </h2>
+                    <div class="stats">
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="100">
+                            <i class="fas fa-wallet" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--primary-color);"></i>
+                            <div class="stat-value" id="home-total-balance">0</div>
+                            <div class="stat-label">الرصيد الحالي</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="150">
+                            <i class="fas fa-arrow-down" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--success-color);"></i>
+                            <div class="stat-value" id="home-total-deposits-amount">0</div>
+                            <div class="stat-label">إجمالي الإيداعات</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="200">
+                            <i class="fas fa-arrow-up" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger-color);"></i>
+                            <div class="stat-value" id="home-total-expenses-amount">0</div>
+                            <div class="stat-label">إجمالي المصروفات</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="250">
+                            <i class="fas fa-sort-amount-down" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: #8b5cf6;"></i>
+                            <div class="stat-value" id="total-deposits">0</div>
+                            <div class="stat-label">عدد الإيداعات</div>
+                        </div>
+                        <div class="stat-item" data-aos="zoom-in" data-aos-delay="300">
+                            <i class="fas fa-shopping-cart" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: #f59e0b;"></i>
+                            <div class="stat-value" id="total-expenses">0</div>
+                            <div class="stat-label">عدد المصروفات</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" data-aos="fade-up" data-aos-delay="150">
+                    <h2 class="card-header">
+                        <i class="fas fa-history"></i>
+                        آخر الإيداعات
+                    </h2>
+                    <div id="recent-deposits"></div>
+                </div>
+
+                <div class="card" data-aos="fade-up" data-aos-delay="175">
+                    <h2 class="card-header">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        آخر السحوبات
+                    </h2>
+                    <div id="recent-withdrawals"></div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section" data-aos="fade-up" data-aos-delay="200">
+                    <div class="chart-card">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-pie" style="color: var(--primary-color);"></i>
+                            توزيع الإيداعات حسب الحالة
+                        </h3>
+                        <canvas id="depositsStatusChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-line" style="color: var(--success-color);"></i>
+                            الإيداعات والمصروفات
+                        </h3>
+                        <canvas id="depositsVsExpensesChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="add-deposit" class="page">
+                <div class="card" data-aos="fade-up">
+                    <h2 class="card-header">
+                        <i class="fas fa-plus-circle"></i>
+                        إضافة إيداع جديد
+                    </h2>
+                    <form id="deposit-form">
+                        <div class="form-group">
+                            <label for="depositor-name"><i class="fas fa-user"></i> اسم العضو</label>
+                            <input type="text" id="depositor-name" placeholder="أدخل اسمك الكامل" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="depositor-phone"><i class="fas fa-phone"></i> رقم الهاتف المحول منه</label>
+                            <input type="tel" id="depositor-phone" placeholder="أدخل رقم الهاتف" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deposit-amount"><i class="fas fa-money-bill-wave"></i> المبلغ (جنيه)</label>
+                            <input type="number" id="deposit-amount" min="1" placeholder="أدخل المبلغ" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deposit-proof"><i class="fas fa-image"></i> صورة إثبات التحويل</label>
+                            <input type="file" id="deposit-proof" accept="image/*" required>
+                            <img id="proof-preview" class="image-preview" alt="معاينة الصورة">
+                        </div>
+                        <div class="wallet-info">
+                            <p><i class="fas fa-mobile-alt"></i> رقم المحفظة:</p>
+                            <p class="wallet-number">01097612534</p>
+                            <p><i class="fas fa-info-circle"></i> يرجى إرفاق صورة إثبات التحويل بعد الإيداع</p>
+                        </div>
+                        <button type="submit"><i class="fas fa-paper-plane"></i> إضافة الإيداع</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="add-withdrawal" class="page">
+                <div class="card" data-aos="fade-up">
+                    <h2 class="card-header">
+                        <i class="fas fa-minus-circle"></i>
+                        إضافة عملية سحب جديدة
+                    </h2>
+                    <form id="withdrawal-form">
+                        <div class="form-group">
+                            <label for="withdrawal-name"><i class="fas fa-user"></i> اسم العضو</label>
+                            <input type="text" id="withdrawal-name" placeholder="أدخل اسمك الكامل" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="withdrawal-phone"><i class="fas fa-phone"></i> رقم الهاتف المحول إليه</label>
+                            <input type="tel" id="withdrawal-phone" placeholder="أدخل رقم الهاتف" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="withdrawal-amount"><i class="fas fa-money-bill-wave"></i> المبلغ (جنيه)</label>
+                            <input type="number" id="withdrawal-amount" min="1" placeholder="أدخل المبلغ" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="withdrawal-reason"><i class="fas fa-comment"></i> سبب السحب</label>
+                            <textarea id="withdrawal-reason" placeholder="اكتب سبب السحب (اختياري)"></textarea>
+                        </div>
+                        <div class="wallet-info" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); border-right: 4px solid var(--danger-color);">
+                            <p><i class="fas fa-exclamation-triangle"></i> تنبيه:</p>
+                            <p style="color: var(--danger-color); font-weight: 600;">سيتم مراجعة طلب السحب والموافقة عليه من قبل الإدارة</p>
+                        </div>
+                        <button type="submit" style="background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);"><i class="fas fa-paper-plane"></i> تقديم طلب السحب</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="deposits" class="page">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div class="card" data-aos="fade-up">
+                        <h2 class="card-header"><i class="fas fa-arrow-down"></i> سجل الإيداعات</h2>
+                        
+                        <!-- Search and Filter -->
+                        <div class="search-filter-section">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="deposits-search" placeholder="ابحث عن اسم أو رقم هاتف..." onkeyup="filterDeposits()">
+                            </div>
+                            <div class="filter-group">
+                                <button class="filter-btn active" onclick="filterByStatus('all')" data-status="all"><i class="fas fa-list"></i> الكل</button>
+                                <button class="filter-btn" onclick="filterByStatus('pending')" data-status="pending"><i class="fas fa-clock"></i> معلق</button>
+                                <button class="filter-btn" onclick="filterByStatus('approved')" data-status="approved"><i class="fas fa-check"></i> مقبول</button>
+                                <button class="filter-btn" onclick="filterByStatus('rejected')" data-status="rejected"><i class="fas fa-times"></i> مرفوض</button>
+                            </div>
+                        </div>
+                        
+                        <div class="deposits-container">
+                            <table class="deposits-table">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortTable('deposits-list', 0)"><i class="fas fa-user"></i> الاسم <span class="sort-indicator">↕</span></th>
+                                        <th onclick="sortTable('deposits-list', 1)"><i class="fas fa-phone"></i> الهاتف <span class="sort-indicator">↕</span></th>
+                                        <th onclick="sortTable('deposits-list', 2)"><i class="fas fa-coins"></i> المبلغ <span class="sort-indicator">↕</span></th>
+                                        <th onclick="sortTable('deposits-list', 3)"><i class="fas fa-calendar"></i> التاريخ <span class="sort-indicator">↕</span></th>
+                                        <th><i class="fas fa-check-circle"></i> الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deposits-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="card-header"><i class="fas fa-hand-holding-usd"></i> سجل السحوبات</h2>
+                        
+                        <!-- Search and Filter -->
+                        <div class="search-filter-section">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="withdrawals-search" placeholder="ابحث عن اسم أو رقم هاتف..." onkeyup="filterWithdrawals()">
+                            </div>
+                            <div class="filter-group">
+                                <button class="filter-btn active" onclick="filterWithdrawalsByStatus('all')" data-status="all"><i class="fas fa-list"></i> الكل</button>
+                                <button class="filter-btn" onclick="filterWithdrawalsByStatus('pending')" data-status="pending"><i class="fas fa-clock"></i> معلق</button>
+                                <button class="filter-btn" onclick="filterWithdrawalsByStatus('approved')" data-status="approved"><i class="fas fa-check"></i> مقبول</button>
+                                <button class="filter-btn" onclick="filterWithdrawalsByStatus('rejected')" data-status="rejected"><i class="fas fa-times"></i> مرفوض</button>
+                            </div>
+                        </div>
+                        
+                        <div class="deposits-container">
+                            <table class="deposits-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> الاسم</th>
+                                        <th><i class="fas fa-phone"></i> الهاتف</th>
+                                        <th><i class="fas fa-coins"></i> المبلغ</th>
+                                        <th><i class="fas fa-comment"></i> السبب</th>
+                                        <th><i class="fas fa-calendar"></i> التاريخ</th>
+                                        <th><i class="fas fa-check-circle"></i> الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="withdrawals-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card" data-aos="fade-up" data-aos-delay="200">
+                        <h2 class="card-header"><i class="fas fa-arrow-up"></i> سجل المصروفات</h2>
+                        <div style="overflow-x: auto;">
+                            <table class="deposits-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-pen"></i> الوصف</th>
+                                        <th><i class="fas fa-tag"></i> الفئة</th>
+                                        <th><i class="fas fa-coins"></i> المبلغ</th>
+                                        <th><i class="fas fa-calendar"></i> التاريخ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="admin" class="page">
+                <div id="admin-login-section" class="card admin-login" data-aos="zoom-in">
+                    <h2 class="card-header"><i class="fas fa-lock"></i> تسجيل دخول الإدارة</h2>
+                    <form id="admin-login-form">
+                        <div class="form-group">
+                            <label for="admin-username"><i class="fas fa-user"></i> اسم المستخدم</label>
+                            <input type="text" id="admin-username" placeholder="أدخل اسم المستخدم" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-password"><i class="fas fa-key"></i> كلمة المرور</label>
+                            <input type="password" id="admin-password" placeholder="أدخل كلمة المرور" required>
+                        </div>
+                        <button type="submit"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
+                    </form>
+                </div>
+
+                <div id="admin-dashboard" style="display: none;">
+                    <div style="text-align: left; margin-bottom: 1.5rem;">
+                        <button class="btn btn-danger" onclick="adminLogout();" style="background-color: var(--danger-color); border: none; padding: 0.6rem 1.2rem; font-size: 0.9rem;">
+                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                        </button>
+                    </div>
+
+                    <div class="card admin-section" data-aos="fade-up">
+                        <h2 class="card-header"><i class="fas fa-chart-bar"></i> الإحصائيات</h2>
+                        <div class="stats">
+                            <div class="stat-item" data-aos="zoom-in" data-aos-delay="300">
+                                <i class="fas fa-arrow-down" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--success-color);"></i>
+                                <div class="stat-value" id="admin-total-deposits">0</div>
+                                <div class="stat-label">إجمالي الإيداعات</div>
+                            </div>
+                            <div class="stat-item" data-aos="zoom-in" data-aos-delay="400">
+                                <i class="fas fa-arrow-up" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger-color);"></i>
+                                <div class="stat-value" id="admin-total-expenses">0</div>
+                                <div class="stat-label">إجمالي المصروفات</div>
+                            </div>
+                            <div class="stat-item" data-aos="zoom-in" data-aos-delay="500">
+                                <i class="fas fa-wallet" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--primary-color);"></i>
+                                <div class="stat-value" id="admin-current-balance">0</div>
+                                <div class="stat-label">الرصيد الحالي</div>
+                            </div>
+                        </div>
+                    </div>
+ <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="card-header"><i class="fas fa-cash-register"></i> إضافة مصروفات</h2>
+                        <form id="expense-form">
+                            <div class="form-group">
+                                <label for="expense-description"><i class="fas fa-pen"></i> وصف المصروف</label>
+                                <input type="text" id="expense-description" placeholder="أدخل وصف المصروف" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expense-category"><i class="fas fa-tag"></i> التصنيف</label>
+                                <input type="text" id="expense-category" placeholder="أدخل التصنيف " required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expense-amount"><i class="fas fa-money-bill-wave"></i> المبلغ (جنيه)</label>
+                                <input type="number" id="expense-amount" min="1" placeholder="أدخل المبلغ" required>
+                            </div>
+                            <button type="submit" class="btn-danger"><i class="fas fa-plus"></i> إضافة المصروف</button>
+                        </form>
+                    </div>
+                    
+                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="150">
+                        <h2 class="card-header" style="margin-bottom: 0;">
+                            <i class="fas fa-tasks"></i>
+                            <span id="current-tab-title">إدارة الإيداعات</span>
+                        </h2>
+                        <div class="admin-tabs">
+                            <div class="tab-headers">
+                                <button class="tab-header active" onclick="switchAdminTab('deposits')" data-title="إدارة الإيداعات">
+                                    <i class="fas fa-arrow-down"></i> الإيداعات
+                                </button>
+                                <button class="tab-header" onclick="switchAdminTab('expenses')" data-title="إدارة المصروفات">
+                                    <i class="fas fa-shopping-cart"></i> المصروفات
+                                </button>
+                                <button class="tab-header" onclick="switchAdminTab('withdrawals')" data-title="إدارة السحوبات">
+                                    <i class="fas fa-hand-holding-usd"></i> السحوبات
+                                </button>
+                            </div>
+                            
+                            <div class="tab-content">
+                                <!-- إدارة الإيداعات -->
+                                <div id="admin-tab-deposits" class="tab-pane active">
+                                    <div class="admin-filters">
+                                        <div class="search-box" style="flex: 1;">
+                                            <i class="fas fa-search"></i>
+                                            <input type="text" id="admin-deposits-search" placeholder="بحث بالاسم أو رقم الهاتف..." onkeyup="filterAdminDeposits()">
+                                        </div>
+                                        <div class="filter-buttons">
+                                            <button class="filter-btn active" onclick="filterAdminDepositsByStatus('all')">
+                                                <i class="fas fa-list"></i> الكل
+                                            </button>
+                                            <button class="filter-btn" onclick="filterAdminDepositsByStatus('pending')">
+                                                <i class="fas fa-clock"></i> معلق
+                                            </button>
+                                            <button class="filter-btn" onclick="filterAdminDepositsByStatus('approved')">
+                                                <i class="fas fa-check-circle"></i> مقبول
+                                            </button>
+                                            <button class="filter-btn" onclick="filterAdminDepositsByStatus('rejected')">
+                                                <i class="fas fa-times-circle"></i> مرفوض
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="overflow-x: auto;">
+                                        <table class="deposits-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-user"></i> الاسم</th>
+                                                    <th><i class="fas fa-phone"></i> الهاتف</th>
+                                                    <th><i class="fas fa-coins"></i> المبلغ</th>
+                                                    <th><i class="fas fa-calendar"></i> التاريخ</th>
+                                                    <th><i class="fas fa-check-circle"></i> الحالة</th>
+                                                    <th><i class="fas fa-cog"></i> الإجراءات</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="admin-deposits-list"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- إدارة المصروفات -->
+                                <div id="admin-tab-expenses" class="tab-pane">
+                                    <div class="admin-filters">
+                                        <div class="search-box" style="flex: 1;">
+                                            <i class="fas fa-search"></i>
+                                            <input type="text" id="admin-expenses-search" placeholder="بحث بالوصف أو الفئة..." onkeyup="filterAdminExpenses()">
+                                        </div>
+                                    </div>
+                                    <div style="overflow-x: auto;">
+                                        <table class="deposits-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-pen"></i> الوصف</th>
+                                                    <th><i class="fas fa-tag"></i> الفئة</th>
+                                                    <th><i class="fas fa-coins"></i> المبلغ</th>
+                                                    <th><i class="fas fa-calendar"></i> التاريخ</th>
+                                                    <th><i class="fas fa-cog"></i> الإجراءات</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="admin-expenses-list"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- إدارة السحوبات -->
+                                <div id="admin-tab-withdrawals" class="tab-pane">
+                                    <div class="admin-filters">
+                                        <div class="search-box" style="flex: 1;">
+                                            <i class="fas fa-search"></i>
+                                            <input type="text" id="admin-withdrawals-search" placeholder="بحث بالاسم أو رقم الهاتف..." onkeyup="filterAdminWithdrawals()">
+                                        </div>
+                                        <div class="filter-buttons">
+                                            <button class="filter-btn active" onclick="filterAdminWithdrawalsByStatus('all')">
+                                                <i class="fas fa-list"></i> الكل
+                                            </button>
+                                            <button class="filter-btn" onclick="filterAdminWithdrawalsByStatus('pending')">
+                                                <i class="fas fa-clock"></i> معلق
+                                            </button>
+                                            <button class="filter-btn" onclick="filterAdminWithdrawalsByStatus('approved')">
+                                                <i class="fas fa-check-circle"></i> مقبول
+                                            </button>
+                                            <button class="filter-btn" onclick="filterAdminWithdrawalsByStatus('rejected')">
+                                                <i class="fas fa-times-circle"></i> مرفوض
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="overflow-x: auto;">
+                                        <table class="deposits-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-user"></i> الاسم</th>
+                                                    <th><i class="fas fa-phone"></i> الهاتف</th>
+                                                    <th><i class="fas fa-coins"></i> المبلغ</th>
+                                                    <th><i class="fas fa-comment"></i> السبب</th>
+                                                    <th><i class="fas fa-calendar"></i> التاريخ</th>
+                                                    <th><i class="fas fa-check-circle"></i> الحالة</th>
+                                                    <th><i class="fas fa-cog"></i> الإجراءات</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="admin-withdrawals-list"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                   
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p><i class="fas fa-wallet"></i> فلوسنا - المحفظة الجماعية<br><small>&copy; 2025 جميع الحقوق محفوظة</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        AOS.init({duration: 800, easing: 'ease-in-out-cubic', once: true, offset: 100});
+
+        // دالة لدعم النصوص العربية في PDF
+        function reverseArabicText(text) {
+            // هذه دالة مساعدة لعكس النص العربي
+            // في الواقع، jsPDF يتعامل مع العربية مباشرة
+            return text;
+        }
+
+        // تسجيل خط Arial لدعم العربية
+        if (typeof window.jsPDF !== 'undefined') {
+            const { jsPDF } = window.jspdf;
+            // استخدام font helvetica كبديل آمن
+        }
+
+        let appData = {deposits: [], expenses: [], withdrawals: [], adminLoggedIn: false, adminCredentials: {username: "admin", password: "admin123"}};
+
+        // ========== نظام Toast Notifications ==========
+        function showToast(message, type = 'success') {
+            console.log('🔔 showToast called:', message, type);
+            const container = document.getElementById('toast-container');
+            console.log('📦 Container element:', container);
+            if (!container) {
+                console.error('❌ Toast container not found!');
+                return;
+            }
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="toast-icon ${icons[type]}"></i>
+                <div class="toast-content">
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            console.log('✅ Toast added to container');
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.transition = 'all 0.3s ease-out';
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // ========== إعدادات Google Sheets و Telegram ==========
+        const GOOGLE_SHEETS_CONFIG = {
+            enabled: true, // غير الى true بعد الإعداد
+            scriptUrl: 'https://script.google.com/macros/s/AKfycbwrihLt0eYbjteEznnXUwj5kdv14Ls9gtRqhBDsRKk1dMcYKj0tJ_W07DQ6iQ6QOqSLKA/exec', // ضع رابط Google Apps Script Web App هنا
+        };
+
+        const TELEGRAM_CONFIG = {
+            enabled: true, // غير الى true بعد الإعداد
+            botToken: '8299247400:AAHOJU7qIanXJrvHEaryAkx5uL_MK8DTzOg', // ضع Bot Token هنا
+            chatId: '5773416612', // ضع Chat ID هنا
+        };
+
+        // ========== دوال Google Sheets ==========
+        async function sendToGoogleSheets(sheetName, data) {
+            if (!GOOGLE_SHEETS_CONFIG.enabled || !GOOGLE_SHEETS_CONFIG.scriptUrl) {
+                console.log('Google Sheets غير مفعل');
+                return;
+            }
+
+            try {
+                const response = await fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({sheet: sheetName, data: data})
+                });
+                console.log(`تم إرسال البيانات إلى ${sheetName}`);
+            } catch (error) {
+                console.error('خطأ في إرسال البيانات إلى Google Sheets:', error);
+            }
+        }
+
+        // ========== دوال Telegram ==========
+        async function sendTelegramNotification(message) {
+            if (!TELEGRAM_CONFIG.enabled || !TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) {
+                console.log('Telegram غير مفعل');
+                return;
+            }
+
+            console.log('🔄 جاري إرسال الإشعار إلى Telegram...');
+            console.log('Bot Token:', TELEGRAM_CONFIG.botToken.substring(0, 10) + '...');
+            console.log('Chat ID:', TELEGRAM_CONFIG.chatId);
+
+            try {
+                const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+                const payload = {
+                    chat_id: TELEGRAM_CONFIG.chatId,
+                    text: message.trim(),
+                    parse_mode: 'HTML'
+                };
+                
+                console.log('📤 البيانات المرسلة:', payload);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                console.log('📥 الرد من Telegram:', result);
+                
+                if (result.ok) {
+                    console.log('✅ تم إرسال الإشعار إلى Telegram بنجاح');
+                } else {
+                    console.error('❌ خطأ من Telegram API:', result);
+                    showToast('فشل إرسال الإشعار: ' + (result.description || 'خطأ غير معروف'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ خطأ في إرسال الإشعار إلى Telegram:', error);
+                showToast('خطأ في الاتصال بـ Telegram: ' + error.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            checkAdminLoginStatus();
+            updateUI();
+        });
+
+        function loadData() {
+            const savedData = localStorage.getItem('flosnaData');
+            if (savedData) {
+                appData = JSON.parse(savedData);
+                // التأكد من وجود مصفوفة السحوبات
+                if (!appData.withdrawals) {
+                    appData.withdrawals = [];
+                }
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('flosnaData', JSON.stringify(appData));
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                    document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            document.getElementById('deposit-form').addEventListener('submit', function(e) { e.preventDefault(); addDeposit(); });
+            document.getElementById('deposit-proof').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('proof-preview').src = event.target.result;
+                        document.getElementById('proof-preview').style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('admin-login-form').addEventListener('submit', function(e) { e.preventDefault(); adminLogin(); });
+            document.getElementById('expense-form').addEventListener('submit', function(e) { e.preventDefault(); addExpense(); });
+            document.getElementById('withdrawal-form').addEventListener('submit', function(e) { e.preventDefault(); addWithdrawal(); });
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            AOS.refresh();
+        }
+
+        function addDeposit() {
+            const name = document.getElementById('depositor-name').value;
+            const phone = document.getElementById('depositor-phone').value;
+            const amount = parseInt(document.getElementById('deposit-amount').value);
+            const proofInput = document.getElementById('deposit-proof');
+            
+            if (!name || !phone || !amount || !proofInput.files[0]) { showToast('يرجى ملء جميع الحقول', 'warning'); return; }
+            
+            // Validate Egyptian phone number (11 digits)
+            if (!/^\d{11}$/.test(phone)) { showToast('رقم الهاتف يجب أن يكون 11 رقم مصري', 'warning'); return; }
+
+            const proofFile = proofInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const newDeposit = {
+                    id: Date.now(), name: name, phone: phone, amount: amount,
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    status: 'pending', proof: event.target.result
+                };
+                appData.deposits.push(newDeposit);
+                saveData();
+                
+                // إرسال إلى Google Sheets - ورقة الإيداعات المعلقة
+                sendToGoogleSheets('الإيداعات_المعلقة', {
+                    التاريخ: newDeposit.date,
+                    الاسم: name,
+                    الهاتف: phone,
+                    المبلغ: amount,
+                    الحالة: 'معلق'
+                });
+                
+                updateUI();
+                document.getElementById('deposit-form').reset();
+                document.getElementById('proof-preview').style.display = 'none';
+                addActivity('deposit', `تم إضافة إيداع جديد من ${name}`);
+                showToast('تم إضافة الإيداع بنجاح، بانتظار الموافقة', 'success');
+                showPage('home');
+            };
+            reader.readAsDataURL(proofFile);
+        }
+
+        function addWithdrawal() {
+            const name = document.getElementById('withdrawal-name').value;
+            const phone = document.getElementById('withdrawal-phone').value;
+            const amount = parseInt(document.getElementById('withdrawal-amount').value);
+            const reason = document.getElementById('withdrawal-reason').value;
+            
+            if (!name || !phone || !amount) { showToast('يرجى ملء جميع الحقول المطلوبة', 'warning'); return; }
+            
+            // Validate Egyptian phone number (11 digits)
+            if (!/^\d{11}$/.test(phone)) { showToast('رقم الهاتف يجب أن يكون 11 رقم مصري', 'warning'); return; }
+
+            const newWithdrawal = {
+                id: Date.now(), 
+                name: name, 
+                phone: phone, 
+                amount: amount,
+                reason: reason || 'لا يوجد',
+                date: new Date().toLocaleDateString('ar-EG'),
+                status: 'pending'
+            };
+            
+            appData.withdrawals.push(newWithdrawal);
+            saveData();
+            
+            // إرسال إلى Google Sheets - ورقة السحوبات
+            sendToGoogleSheets('السحوبات_المعلقة', {
+                التاريخ: newWithdrawal.date,
+                الاسم: name,
+                الهاتف: phone,
+                المبلغ: amount,
+                السبب: reason || 'لا يوجد',
+                الحالة: 'معلق'
+            });
+            
+            updateUI();
+            document.getElementById('withdrawal-form').reset();
+            addActivity('withdrawal', `تم إضافة طلب سحب جديد من ${name}`);
+            showToast('تم تقديم طلب السحب بنجاح، بانتظار الموافقة من الإدارة', 'success');
+            showPage('home');
+        }
+
+        function adminLogin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            if (username === appData.adminCredentials.username && password === appData.adminCredentials.password) {
+                appData.adminLoggedIn = true;
+                saveData();
+                localStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('admin-login-section').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'block';
+                updateAdminDashboard();
+            } else {
+                showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+            }
+        }
+
+        function adminLogout() {
+            appData.adminLoggedIn = false;
+            localStorage.setItem('adminLoggedIn', 'false');
+            saveData();
+            document.getElementById('admin-login-section').style.display = 'block';
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-password').value = '';
+        }
+
+        function checkAdminLoginStatus() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            if (isLoggedIn) {
+                appData.adminLoggedIn = true;
+                document.getElementById('admin-login-section').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'block';
+                updateAdminDashboard();
+            }
+        }
+
+        async function addExpense() {
+            console.log('🚀 بدء إضافة مصروف جديد...');
+            const description = document.getElementById('expense-description').value;
+            const category = document.getElementById('expense-category').value;
+            const amount = parseInt(document.getElementById('expense-amount').value);
+            console.log('📋 البيانات:', {description, category, amount});
+            if (!description || !amount) { showToast('يرجى ملء جميع الحقول', 'warning'); return; }
+            
+            const newExpense = {id: Date.now(), description: description, category: category, amount: amount, date: new Date().toLocaleDateString('ar-EG')};
+            appData.expenses.push(newExpense);
+            saveData();
+            console.log('💾 تم حفظ المصروف محلياً');
+            
+            // إرسال إلى Google Sheets - ورقة المصروفات
+            sendToGoogleSheets('المصروفات', {
+                التاريخ: newExpense.date,
+                الوصف: description,
+                الفئة: category,
+                المبلغ: amount
+            });
+            
+            // إرسال إشعار Telegram
+            console.log('📱 جاري تحضير إشعار Telegram للمصروف...');
+            const message = `<b>مصروف جديد</b>\n\n<b>الوصف:</b> ${description}\n<b>الفئة:</b> ${category}\n<b>المبلغ:</b> ${amount} جنيه\n<b>التاريخ:</b> ${newExpense.date}`;
+            console.log('📨 نص الرسالة:', message);
+            sendTelegramNotification(message).catch(error => {
+                console.error('❌ خطأ في إرسال الإشعار:', error);
+            });
+            
+            updateUI();
+            updateAdminDashboard();
+            document.getElementById('expense-form').reset();
+            showToast('تم إضافة المصروف بنجاح', 'success');
+        }
+
+        function updateUI() {
+            updateHomePage();
+            updateDepositsPage();
+            if (appData.adminLoggedIn) updateAdminDashboard();
+        }
+
+        function updateHomePage() {
+            const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, deposit) => sum + deposit.amount, 0);
+            const totalExpenses = appData.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const currentBalance = totalDeposits - totalExpenses;
+            
+            document.getElementById('total-balance').innerHTML = `<i class="fas fa-pound-sign"></i> ${currentBalance}`;
+            document.getElementById('total-deposits').textContent = appData.deposits.filter(d => d.status === 'approved').length;
+            document.getElementById('total-expenses').textContent = appData.expenses.length;
+            
+            // تحديث الإحصائيات في الصفحة الرئيسية
+            document.getElementById('home-total-balance').textContent = currentBalance;
+            document.getElementById('home-total-deposits-amount').textContent = totalDeposits;
+            document.getElementById('home-total-expenses-amount').textContent = totalExpenses;
+            
+            const recentDepositsContainer = document.getElementById('recent-deposits');
+            const recentDeposits = appData.deposits.sort((a, b) => b.id - a.id).slice(0, 5);
+            
+            if (recentDeposits.length === 0) {
+                recentDepositsContainer.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد إيداعات حتى الآن</p></div>';
+            } else {
+                let html = '';
+                recentDeposits.forEach((deposit, index) => {
+                    const statusIcon = deposit.status === 'approved' ? 'fa-check-circle' : deposit.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    html += `<div class="recent-deposit-item"><div class="deposit-name"><i class="fas fa-user-circle"></i> ${deposit.name}</div><div class="deposit-amount"><i class="fas fa-pound-sign"></i> ${deposit.amount}</div><div class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</div></div>`;
+                });
+                recentDepositsContainer.innerHTML = html;
+            }
+            
+            // تحديث آخر السحوبات
+            const recentWithdrawalsContainer = document.getElementById('recent-withdrawals');
+            const recentWithdrawals = appData.withdrawals.sort((a, b) => b.id - a.id).slice(0, 5);
+            
+            if (recentWithdrawals.length === 0) {
+                recentWithdrawalsContainer.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد سحوبات حتى الآن</p></div>';
+            } else {
+                let html = '';
+                recentWithdrawals.forEach((withdrawal) => {
+                    const statusIcon = withdrawal.status === 'approved' ? 'fa-check-circle' : withdrawal.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    html += `<div class="recent-deposit-item"><div class="deposit-name"><i class="fas fa-user-circle"></i> ${withdrawal.name}</div><div class="deposit-amount" style="color: var(--danger-color);"><i class="fas fa-minus"></i> ${withdrawal.amount}</div><div class="status-badge status-${withdrawal.status}"><i class="fas ${statusIcon}"></i>${getStatusText(withdrawal.status)}</div></div>`;
+                });
+                recentWithdrawalsContainer.innerHTML = html;
+            }
+        }
+
+        function updateDepositsPage() {
+            const depositsList = document.getElementById('deposits-list');
+            if (appData.deposits.length === 0) {
+                depositsList.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد إيداعات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.deposits.sort((a, b) => b.id - a.id).forEach(deposit => {
+                    const statusIcon = deposit.status === 'approved' ? 'fa-check-circle' : deposit.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    const phone = deposit.phone || '-';
+                    html += `<tr><td>${deposit.name}</td><td>${phone}</td><td>${deposit.amount}</td><td>${deposit.date}</td><td><span class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</span></td></tr>`;
+                });
+                depositsList.innerHTML = html;
+            }
+            
+            const expensesList = document.getElementById('expenses-list');
+            if (appData.expenses.length === 0) {
+                expensesList.innerHTML = '<tr><td colspan="4"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد مصروفات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.expenses.sort((a, b) => b.id - a.id).forEach(expense => {
+                    const category = expense.category || 'غير محدد';
+                    html += `<tr><td>${expense.description}</td><td>${category}</td><td>${expense.amount}</td><td>${expense.date}</td></tr>`;
+                });
+                expensesList.innerHTML = html;
+            }
+            
+            // تحديث قائمة السحوبات
+            const withdrawalsList = document.getElementById('withdrawals-list');
+            if (appData.withdrawals.length === 0) {
+                withdrawalsList.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد سحوبات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.withdrawals.sort((a, b) => b.id - a.id).forEach(withdrawal => {
+                    const statusIcon = withdrawal.status === 'approved' ? 'fa-check-circle' : withdrawal.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    html += `<tr><td>${withdrawal.name}</td><td>${withdrawal.phone}</td><td>${withdrawal.amount}</td><td>${withdrawal.reason}</td><td>${withdrawal.date}</td><td><span class="status-badge status-${withdrawal.status}"><i class="fas ${statusIcon}"></i>${getStatusText(withdrawal.status)}</span></td></tr>`;
+                });
+                withdrawalsList.innerHTML = html;
+            }
+        }
+
+        function updateAdminDashboard() {
+            const adminDepositsList = document.getElementById('admin-deposits-list');
+            if (appData.deposits.length === 0) {
+                adminDepositsList.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد إيداعات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.deposits.sort((a, b) => b.id - a.id).forEach(deposit => {
+                    const statusIcon = deposit.status === 'approved' ? 'fa-check-circle' : deposit.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    const actionButtons = deposit.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="updateDepositStatus(${deposit.id}, 'approved')"><i class="fas fa-check"></i> قبول</button><button class="btn btn-danger btn-sm" onclick="updateDepositStatus(${deposit.id}, 'rejected')"><i class="fas fa-times"></i> رفض</button>` : '';
+                    const phone = deposit.phone || '-';
+                    html += `<tr data-status="${deposit.status}"><td>${deposit.name}</td><td>${phone}</td><td>${deposit.amount}</td><td>${deposit.date}</td><td><span class="status-badge status-${deposit.status}"><i class="fas ${statusIcon}"></i>${getStatusText(deposit.status)}</span></td><td class="action-buttons">${actionButtons}<button class="btn btn-success btn-sm" onclick="viewProof(${appData.deposits.indexOf(deposit)})"><i class="fas fa-eye"></i> عرض</button><button class="btn btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);" onclick="deleteDeposit(${deposit.id})"><i class="fas fa-trash"></i> حذف</button></td></tr>`;
+                });
+                adminDepositsList.innerHTML = html;
+            }
+            
+            const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, deposit) => sum + deposit.amount, 0);
+            const totalExpenses = appData.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const currentBalance = totalDeposits - totalExpenses;
+            
+            document.getElementById('admin-total-deposits').textContent = totalDeposits;
+            document.getElementById('admin-total-expenses').textContent = totalExpenses;
+            document.getElementById('admin-current-balance').textContent = currentBalance;
+            
+            // تحديث قائمة السحوبات في الإدارة
+            const adminWithdrawalsList = document.getElementById('admin-withdrawals-list');
+            if (appData.withdrawals.length === 0) {
+                adminWithdrawalsList.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد سحوبات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.withdrawals.sort((a, b) => b.id - a.id).forEach(withdrawal => {
+                    const statusIcon = withdrawal.status === 'approved' ? 'fa-check-circle' : withdrawal.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                    const actionButtons = withdrawal.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="updateWithdrawalStatus(${withdrawal.id}, 'approved')"><i class="fas fa-check"></i> قبول</button><button class="btn btn-danger btn-sm" onclick="updateWithdrawalStatus(${withdrawal.id}, 'rejected')"><i class="fas fa-times"></i> رفض</button>` : '';
+                    html += `<tr data-status="${withdrawal.status}"><td>${withdrawal.name}</td><td>${withdrawal.phone}</td><td>${withdrawal.amount}</td><td>${withdrawal.reason}</td><td>${withdrawal.date}</td><td><span class="status-badge status-${withdrawal.status}"><i class="fas ${statusIcon}"></i>${getStatusText(withdrawal.status)}</span></td><td class="action-buttons">${actionButtons}<button class="btn btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);" onclick="deleteWithdrawal(${withdrawal.id})"><i class="fas fa-trash"></i> حذف</button></td></tr>`;
+                });
+                adminWithdrawalsList.innerHTML = html;
+            }
+            
+            // تحديث قائمة المصروفات في الإدارة
+            const adminExpensesList = document.getElementById('admin-expenses-list');
+            if (appData.expenses.length === 0) {
+                adminExpensesList.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد مصروفات حتى الآن</p></div></td></tr>';
+            } else {
+                let html = '';
+                appData.expenses.sort((a, b) => b.id - a.id).forEach(expense => {
+                    const category = expense.category || 'غير محدد';
+                    html += `<tr><td>${expense.description}</td><td>${category}</td><td>${expense.amount}</td><td>${expense.date}</td><td class="action-buttons"><button class="btn btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);" onclick="deleteExpense(${expense.id})"><i class="fas fa-trash"></i> حذف</button></td></tr>`;
+                });
+                adminExpensesList.innerHTML = html;
+            }
+        }
+
+        function updateDepositStatus(id, status) {
+            const deposit = appData.deposits.find(d => d.id === id);
+            if (deposit) { 
+                const oldStatus = deposit.status;
+                deposit.status = status; 
+                saveData(); 
+                
+                // إرسال إلى Google Sheets والإشعار عند الموافقة فقط
+                if (status === 'approved' && oldStatus === 'pending') {
+                    // إرسال إلى ورقة الإيداعات المقبولة
+                    sendToGoogleSheets('الإيداعات_المقبولة', {
+                        التاريخ: deposit.date,
+                        الاسم: deposit.name,
+                        الهاتف: deposit.phone,
+                        المبلغ: deposit.amount,
+                        'تاريخ الموافقة': new Date().toLocaleDateString('ar-EG')
+                    });
+                    
+                    // إرسال إشعار Telegram
+                    const message = `🎉 إيداع مؤكد ✅
+
+👤 الاسم: ${deposit.name}
+📱 الهاتف: ${deposit.phone}
+💰 المبلغ: ${deposit.amount} جنيه
+📅 التاريخ: ${deposit.date}`;
+                    sendTelegramNotification(message);
+                }
+                
+                // إرسال إلى ورقة الإيداعات المرفوضة
+                if (status === 'rejected' && oldStatus === 'pending') {
+                    sendToGoogleSheets('الإيداعات_المرفوضة', {
+                        التاريخ: deposit.date,
+                        الاسم: deposit.name,
+                        الهاتف: deposit.phone,
+                        المبلغ: deposit.amount,
+                        'تاريخ الرفض': new Date().toLocaleDateString('ar-EG')
+                    });
+                }
+                
+                updateUI(); 
+                updateAdminDashboard(); 
+            }
+        }
+
+        function updateWithdrawalStatus(id, status) {
+            const withdrawal = appData.withdrawals.find(w => w.id === id);
+            if (withdrawal) { 
+                const oldStatus = withdrawal.status;
+                withdrawal.status = status; 
+                saveData(); 
+                
+                // إرسال إلى Google Sheets والإشعار عند الموافقة فقط
+                if (status === 'approved' && oldStatus === 'pending') {
+                    // إرسال إلى ورقة السحوبات المقبولة
+                    sendToGoogleSheets('السحوبات_المقبولة', {
+                        التاريخ: withdrawal.date,
+                        الاسم: withdrawal.name,
+                        الهاتف: withdrawal.phone,
+                        المبلغ: withdrawal.amount,
+                        السبب: withdrawal.reason,
+                        'تاريخ الموافقة': new Date().toLocaleDateString('ar-EG')
+                    });
+                    
+                    // إرسال إشعار Telegram
+                    const message = `💸 سحب مؤكد ✅
+
+👤 الاسم: ${withdrawal.name}
+📱 الهاتف: ${withdrawal.phone}
+💰 المبلغ: ${withdrawal.amount} جنيه
+📝 السبب: ${withdrawal.reason}
+📅 التاريخ: ${withdrawal.date}`;
+                    sendTelegramNotification(message);
+                }
+                
+                // إرسال إلى ورقة السحوبات المرفوضة
+                if (status === 'rejected' && oldStatus === 'pending') {
+                    sendToGoogleSheets('السحوبات_المرفوضة', {
+                        التاريخ: withdrawal.date,
+                        الاسم: withdrawal.name,
+                        الهاتف: withdrawal.phone,
+                        المبلغ: withdrawal.amount,
+                        السبب: withdrawal.reason,
+                        'تاريخ الرفض': new Date().toLocaleDateString('ar-EG')
+                    });
+                }
+                
+                updateUI(); 
+                updateAdminDashboard(); 
+            }
+        }
+
+        function viewProof(index) {
+            const deposit = appData.deposits[index];
+            if (deposit && deposit.proof) {
+                const newWindow = window.open();
+                newWindow.document.write(`<html dir="rtl"><head><title>عرض الإثبات</title><style>body { margin: 0; text-align: center; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; min-height: 100vh; } img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }</style></head><body><img src="${deposit.proof}" alt="إثبات الإيداع"></body></html>`);
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'معلق';
+                case 'approved': return 'مقبول';
+                case 'rejected': return 'مرفوض';
+                default: return status;
+            }
+        }
+
+        // ========== دوال الحذف ==========
+        function deleteDeposit(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الإيداع؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                const deposit = appData.deposits.find(d => d.id === id);
+                if (deposit) {
+                    appData.deposits = appData.deposits.filter(d => d.id !== id);
+                    saveData();
+                    updateUI();
+                    updateAdminDashboard();
+                    showToast(`تم حذف إيداع ${deposit.name} بنجاح`, 'success');
+                }
+            }
+        }
+
+        function deleteWithdrawal(id) {
+            if (confirm('هل أنت متأكد من حذف هذا السحب؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                const withdrawal = appData.withdrawals.find(w => w.id === id);
+                if (withdrawal) {
+                    appData.withdrawals = appData.withdrawals.filter(w => w.id !== id);
+                    saveData();
+                    updateUI();
+                    updateAdminDashboard();
+                    showToast(`تم حذف سحب ${withdrawal.name} بنجاح`, 'success');
+                }
+            }
+        }
+
+        function deleteExpense(id) {
+            if (confirm('هل أنت متأكد من حذف هذا المصروف؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                const expense = appData.expenses.find(e => e.id === id);
+                if (expense) {
+                    appData.expenses = appData.expenses.filter(e => e.id !== id);
+                    saveData();
+                    updateUI();
+                    updateAdminDashboard();
+                    showToast(`تم حذف المصروف "${expense.description}" بنجاح`, 'success');
+                }
+            }
+        }
+
+        // ========== Admin Tabs ==========
+        function switchAdminTab(tabName) {
+            // إخفاء جميع التابات
+            document.querySelectorAll('.tab-pane').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // إزالة active من جميع الأزرار
+            document.querySelectorAll('.tab-header').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // إظهار التاب المطلوب
+            document.getElementById(`admin-tab-${tabName}`).classList.add('active');
+            
+            // تفعيل الزر المطلوب وتحديث العنوان
+            const activeBtn = event.target.closest('.tab-header');
+            activeBtn.classList.add('active');
+            document.getElementById('current-tab-title').textContent = activeBtn.getAttribute('data-title');
+        }
+
+        // ========== Admin Filters ==========
+        let currentAdminDepositFilter = 'all';
+        let currentAdminWithdrawalFilter = 'all';
+
+        function filterAdminDeposits() {
+            const searchTerm = document.getElementById('admin-deposits-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#admin-deposits-list tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0]?.textContent.toLowerCase() || '';
+                const phone = row.cells[1]?.textContent.toLowerCase() || '';
+                const status = row.getAttribute('data-status') || '';
+                
+                const matchesSearch = name.includes(searchTerm) || phone.includes(searchTerm);
+                const matchesFilter = currentAdminDepositFilter === 'all' || status === currentAdminDepositFilter;
+                
+                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        function filterAdminDepositsByStatus(status) {
+            currentAdminDepositFilter = status;
+            
+            // تحديث أزرار الفلتر
+            document.querySelectorAll('#admin-tab-deposits .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            filterAdminDeposits();
+        }
+
+        function filterAdminExpenses() {
+            const searchTerm = document.getElementById('admin-expenses-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#admin-expenses-list tr');
+            
+            rows.forEach(row => {
+                const description = row.cells[0]?.textContent.toLowerCase() || '';
+                const category = row.cells[1]?.textContent.toLowerCase() || '';
+                
+                const matchesSearch = description.includes(searchTerm) || category.includes(searchTerm);
+                
+                row.style.display = matchesSearch ? '' : 'none';
+            });
+        }
+
+        function filterAdminWithdrawals() {
+            const searchTerm = document.getElementById('admin-withdrawals-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#admin-withdrawals-list tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0]?.textContent.toLowerCase() || '';
+                const phone = row.cells[1]?.textContent.toLowerCase() || '';
+                const status = row.getAttribute('data-status') || '';
+                
+                const matchesSearch = name.includes(searchTerm) || phone.includes(searchTerm);
+                const matchesFilter = currentAdminWithdrawalFilter === 'all' || status === currentAdminWithdrawalFilter;
+                
+                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        function filterAdminWithdrawalsByStatus(status) {
+            currentAdminWithdrawalFilter = status;
+            
+            // تحديث أزرار الفلتر
+            document.querySelectorAll('#admin-tab-withdrawals .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            filterAdminWithdrawals();
+        }
+
+        // ========== البحث والتصفية ==========
+        let currentFilter = 'all';
+
+        function filterDeposits() {
+            const searchTerm = document.getElementById('deposits-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#deposits-list tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0]?.textContent.toLowerCase() || '';
+                const phone = row.cells[1]?.textContent.toLowerCase() || '';
+                const status = row.getAttribute('data-status') || '';
+                
+                const matchesSearch = name.includes(searchTerm) || phone.includes(searchTerm);
+                const matchesFilter = currentFilter === 'all' || status === currentFilter;
+                
+                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        function filterByStatus(status) {
+            currentFilter = status;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.filter-btn').classList.add('active');
+            
+            filterDeposits();
+        }
+
+        // دوال التصفية للسحوبات
+        let currentWithdrawalFilter = 'all';
+
+        function filterWithdrawals() {
+            const searchTerm = document.getElementById('withdrawals-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#withdrawals-list tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0]?.textContent.toLowerCase() || '';
+                const phone = row.cells[1]?.textContent.toLowerCase() || '';
+                const status = row.getAttribute('data-status') || '';
+                
+                const matchesSearch = name.includes(searchTerm) || phone.includes(searchTerm);
+                const matchesFilter = currentWithdrawalFilter === 'all' || status === currentWithdrawalFilter;
+                
+                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        function filterWithdrawalsByStatus(status) {
+            currentWithdrawalFilter = status;
+            
+            // Update active button
+            const filterButtons = document.querySelectorAll('#withdrawals-list').closest('.card').querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-status') === status || btn.getAttribute('onclick')?.includes(`'${status}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            filterWithdrawals();
+        }
+
+        // ========== الترتيب ==========
+        let sortDirection = {};
+
+        function sortTable(tableId, colIndex) {
+            const table = document.getElementById(tableId);
+            const rows = Array.from(table.getElementsByTagName('tr'));
+            const isAscending = sortDirection[colIndex] !== true;
+            
+            rows.sort((a, b) => {
+                const aVal = a.cells[colIndex]?.textContent.trim() || '';
+                const bVal = b.cells[colIndex]?.textContent.trim() || '';
+                
+                // محاولة تحويل إلى أرقام
+                const aNum = parseFloat(aVal);
+                const bNum = parseFloat(bVal);
+                
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAscending ? aNum - bNum : bNum - aNum;
+                }
+                
+                return isAscending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+            
+            rows.forEach(row => table.appendChild(row));
+            sortDirection[colIndex] = isAscending;
+        }
+
+        // ========== التصدير ==========
+        function exportDepositsToCSV() {
+            let data = [];
+            const filename = 'الإيداعات.csv';
+            data.push('الاسم,الهاتف,المبلغ,التاريخ,الحالة');
+            
+            appData.deposits.forEach(deposit => {
+                data.push(`"${deposit.name}","${deposit.phone}","${deposit.amount}","${deposit.date}","${getStatusText(deposit.status)}"`);
+            });
+            
+            const csv = data.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportExpensesFromAdminToCSV() {
+            let data = [];
+            const filename = 'المصروفات.csv';
+            data.push('الوصف,التصنيف,المبلغ,التاريخ');
+            
+            appData.expenses.forEach(expense => {
+                data.push(`"${expense.description}","${expense.category || ''}","${expense.amount}","${expense.date}"`);
+            });
+            
+            const csv = data.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportDepositsToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            let yPosition = 20;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            // استخدام النسخة المقلوبة من النص العربي
+            const arabicText = reverseArabicText('تقرير الإيداعات');
+            doc.text(arabicText, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 15;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 10;
+            const columns = ['الاسم', 'الهاتف', 'المبلغ', 'التاريخ', 'الحالة'];
+            const rows = appData.deposits.map(d => [d.name, d.phone || '-', d.amount, d.date, getStatusText(d.status)]);
+            
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: yPosition,
+                margin: 10,
+                bodyStyles: { font: 'helvetica' },
+                headStyles: { font: 'helvetica' },
+                didDrawPage: function(data) {
+                    const str = 'صفحة ' + doc.internal.getNumberOfPages();
+                    doc.setFontSize(10);
+                    doc.text(str, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                }
+            });
+            
+            doc.save('الإيداعات.pdf');
+        }
+
+        function exportExpensesFromAdminToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            let yPosition = 20;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            const arabicText = reverseArabicText('تقرير المصروفات');
+            doc.text(arabicText, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 15;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, pageWidth / 2, yPosition, { align: 'center' });
+            
+            yPosition += 10;
+            const columns = ['الوصف', 'التصنيف', 'المبلغ', 'التاريخ'];
+            const rows = appData.expenses.map(e => [e.description, e.category || '-', e.amount, e.date]);
+            
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: yPosition,
+                margin: 10,
+                bodyStyles: { font: 'helvetica' },
+                headStyles: { font: 'helvetica' },
+                didDrawPage: function(data) {
+                    const str = 'صفحة ' + doc.internal.getNumberOfPages();
+                    doc.setFontSize(10);
+                    doc.text(str, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                }
+            });
+            
+            doc.save('المصروفات.pdf');
+        }
+
+        // ========== إعادة تحديث البيانات مع البحث ==========
+        const originalUpdateDepositsPage = updateDepositsPage;
+        const customUpdateDepositsPage = function() {
+            originalUpdateDepositsPage.call(this);
+            
+            // إضافة data-status لكل صف
+            document.querySelectorAll('#deposits-list tr').forEach(row => {
+                const statusCell = row.cells[4];
+                if (statusCell) {
+                    const status = statusCell.textContent.includes('معلق') ? 'pending' : 
+                                 statusCell.textContent.includes('مقبول') ? 'approved' : 
+                                 statusCell.textContent.includes('مرفوض') ? 'rejected' : 'unknown';
+                    row.setAttribute('data-status', status);
+                }
+            });
+            
+            filterDeposits();
+        };
+        updateDepositsPage = customUpdateDepositsPage;
+
+        // ========== سجل الأنشطة ==========
+        let activityLog = [];
+
+        function addActivity(action, details) {
+            const timestamp = new Date().toLocaleString('ar-EG');
+            activityLog.unshift({
+                action: action,
+                details: details,
+                timestamp: timestamp,
+                icon: getActivityIcon(action)
+            });
+            // الاحتفاظ بـ آخر 50 نشاط فقط
+            if (activityLog.length > 50) activityLog.pop();
+            saveActivity();
+        }
+
+        function getActivityIcon(action) {
+            const icons = {
+                'deposit': 'fas fa-arrow-down',
+                'expense': 'fas fa-arrow-up',
+                'approve': 'fas fa-check',
+                'reject': 'fas fa-times',
+                'login': 'fas fa-sign-in-alt'
+            };
+            return icons[action] || 'fas fa-info-circle';
+        }
+
+        function saveActivity() {
+            localStorage.setItem('flosnaActivity', JSON.stringify(activityLog));
+        }
+
+        function loadActivity() {
+            const saved = localStorage.getItem('flosnaActivity');
+            if (saved) activityLog = JSON.parse(saved);
+        }
+
+        function showActivityLog() {
+            const logContainer = document.getElementById('activityLog');
+            if (activityLog.length === 0) {
+                logContainer.innerHTML = '<p style="text-align: center; color: var(--gray-color);">لا توجد أنشطة حتى الآن</p>';
+            } else {
+                logContainer.innerHTML = activityLog.map(item => `
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="${item.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${item.action}</div>
+                            <div>${item.details}</div>
+                            <div class="activity-time">${item.timestamp}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('activityModal').classList.add('active');
+        }
+
+        function closeActivityModal() {
+            document.getElementById('activityModal').classList.remove('active');
+        }
+
+        // ========== ملاحظات الإيداعات ==========
+        let currentDepositId = null;
+
+        function openNotesModal(depositId) {
+            currentDepositId = depositId;
+            const deposit = appData.deposits.find(d => d.id === depositId);
+            document.getElementById('depositNotesInput').value = deposit?.notes || '';
+            document.getElementById('notesModal').classList.add('active');
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').classList.remove('active');
+        }
+
+        function saveDepositNotes() {
+            if (currentDepositId) {
+                const deposit = appData.deposits.find(d => d.id === currentDepositId);
+                if (deposit) {
+                    deposit.notes = document.getElementById('depositNotesInput').value;
+                    saveData();
+                    addActivity('note', `تم إضافة ملاحظة على إيداع ${deposit.name}`);
+                    closeNotesModal();
+                    showToast('تم حفظ الملاحظات بنجاح', 'success');
+                }
+            }
+        }
+
+        // ========== الرسوم البيانية ==========
+        let depositsStatusChart = null;
+        let depositsVsExpensesChart = null;
+
+        function createCharts() {
+            createDepositsStatusChart();
+            createDepositsVsExpensesChart();
+        }
+
+        function createDepositsStatusChart() {
+            const ctx = document.getElementById('depositsStatusChart');
+            if (!ctx) return;
+
+            const approved = appData.deposits.filter(d => d.status === 'approved').length;
+            const pending = appData.deposits.filter(d => d.status === 'pending').length;
+            const rejected = appData.deposits.filter(d => d.status === 'rejected').length;
+
+            if (depositsStatusChart) depositsStatusChart.destroy();
+
+            depositsStatusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مقبول', 'معلق', 'مرفوض'],
+                    datasets: [{
+                        data: [approved, pending, rejected],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderColor: ['#059669', '#d97706', '#dc2626'],
+                        borderWidth: 2,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 12, family: "'Cairo', sans-serif" },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDepositsVsExpensesChart() {
+            const ctx = document.getElementById('depositsVsExpensesChart');
+            if (!ctx) return;
+
+            const approvedDeposits = appData.deposits
+                .filter(d => d.status === 'approved')
+                .reduce((sum, d) => sum + d.amount, 0);
+            const totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+
+            if (depositsVsExpensesChart) depositsVsExpensesChart.destroy();
+
+            depositsVsExpensesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['الإيداعات', 'المصروفات'],
+                    datasets: [{
+                        label: 'المبلغ',
+                        data: [approvedDeposits, totalExpenses],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderColor: ['#059669', '#dc2626'],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        hoverBackgroundColor: ['#059669', '#dc2626']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { font: { family: "'Cairo', sans-serif" } }
+                        },
+                        y: {
+                            ticks: { font: { family: "'Cairo', sans-serif" } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // تحديث الرسوم البيانية عند تحديث البيانات
+        const originalUpdateHomePage = updateHomePage;
+        updateHomePage = function() {
+            originalUpdateHomePage.call(this);
+            setTimeout(createCharts, 100);
+        };
+
+        // ========== تحديث addExpense لإضافة التصنيف ==========
+        const originalAddExpense = addExpense;
+        addExpense = function() {
+            const description = document.getElementById('expense-description').value;
+            const amount = parseInt(document.getElementById('expense-amount').value);
+            const category = document.getElementById('expense-category').value;
+            
+            if (!description || !amount) { showToast('يرجى ملء جميع الحقول', 'warning'); return; }
+            
+            const newExpense = {
+                id: Date.now(),
+                description: description,
+                amount: amount,
+                category: category,
+                date: new Date().toLocaleDateString('ar-EG')
+            };
+            appData.expenses.push(newExpense);
+            saveData();
+            updateUI();
+            updateAdminDashboard();
+            document.getElementById('expense-form').reset();
+            addActivity('expense', `تم إضافة مصروف: ${description} - ${category}`);
+            showToast('تم إضافة المصروف بنجاح', 'success');
+        };
+
+        // تحميل سجل الأنشطة عند بدء التطبيق
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActivity();
+        }, { once: true });
+
+        // إضافة أنشطة عند إجراء عمليات
+        const originalUpdateDepositStatus = updateDepositStatus;
+        updateDepositStatus = function(id, status) {
+            const deposit = appData.deposits.find(d => d.id === id);
+            if (deposit) {
+                const statusText = status === 'approved' ? 'قبول' : 'رفض';
+                addActivity(status === 'approved' ? 'approve' : 'reject', `تم ${statusText} إيداع ${deposit.name}`);
+            }
+            originalUpdateDepositStatus.call(this, id, status);
+        };
+    </script>
+
+</body>
+</html>
