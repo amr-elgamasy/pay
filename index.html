@@ -1280,16 +1280,32 @@
                     
                     // إرسال إشعار Telegram عند الموافقة فقط
                     if (status === 'approved' && oldStatus === 'pending') {
+                        console.log('====== بدء محاولة إرسال Telegram للإيداع ====== ');
+                        console.log('Status:', status, 'Old Status:', oldStatus);
+                        console.log('Deposit:', deposit);
+                        
                         const message = `<b>🎉 إيداع مؤكد ✅</b>
 
 <b>👤 الاسم:</b> ${deposit.name}
 <b>📱 الهاتف:</b> ${deposit.phone}
 <b>💰 المبلغ:</b> ${deposit.amount} جنيه
 <b>📅 التاريخ:</b> ${deposit.date}`;
+                        
                         console.log('📤 محاولة إرسال رسالة Telegram للإيداع...');
-                        sendTelegramNotification(message).catch(err => {
-                            console.error('خطأ في إرسال إشعار Telegram:', err);
-                        });
+                        console.log('Message:', message);
+                        
+                        try {
+                            const telegramResult = await sendTelegramNotification(message);
+                            console.log('🔎 نتيجة Telegram:', telegramResult);
+                            if (telegramResult) {
+                                alert('✅ تم إرسال إشعار Telegram بنجاح!');
+                            } else {
+                                alert('❌ فشل إرسال Telegram - شوف Console');
+                            }
+                        } catch (err) {
+                            console.error('❌ خطأ في إرسال إشعار Telegram:', err);
+                            alert('❌ خطأ في Telegram: ' + err.message);
+                        }
                     }
                     
                     showToast('تم تحديث حالة الإيداع بنجاح', 'success');
@@ -1319,6 +1335,10 @@
                     
                     // إرسال إشعار Telegram عند الموافقة فقط
                     if (status === 'approved' && oldStatus === 'pending') {
+                        console.log('====== بدء محاولة إرسال Telegram للسحب ====== ');
+                        console.log('Status:', status, 'Old Status:', oldStatus);
+                        console.log('Withdrawal:', withdrawal);
+                        
                         const message = `<b>💸 سحب مؤكد ✅</b>
 
 <b>👤 الاسم:</b> ${withdrawal.name}
@@ -1326,10 +1346,22 @@
 <b>💰 المبلغ:</b> ${withdrawal.amount} جنيه
 <b>📝 السبب:</b> ${withdrawal.reason}
 <b>📅 التاريخ:</b> ${withdrawal.date}`;
+                        
                         console.log('📤 محاولة إرسال رسالة Telegram للسحب...');
-                        sendTelegramNotification(message).catch(err => {
-                            console.error('خطأ في إرسال إشعار Telegram:', err);
-                        });
+                        console.log('Message:', message);
+                        
+                        try {
+                            const telegramResult = await sendTelegramNotification(message);
+                            console.log('🔎 نتيجة Telegram:', telegramResult);
+                            if (telegramResult) {
+                                alert('✅ تم إرسال إشعار Telegram بنجاح!');
+                            } else {
+                                alert('❌ فشل إرسال Telegram - شوف Console');
+                            }
+                        } catch (err) {
+                            console.error('❌ خطأ في إرسال إشعار Telegram:', err);
+                            alert('❌ خطأ في Telegram: ' + err.message);
+                        }
                     }
                     
                     showToast('تم تحديث حالة السحب بنجاح', 'success');
