@@ -4,8 +4,45 @@
 // رابط الجدول: https://docs.google.com/spreadsheets/d/1w9UXX3EKLL6zJ4sPCSPFA3S_yC2harQtHAIX_eUqRJQ/edit
 
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({status: 'ok'}))
-    .setMimeType(ContentService.MimeType.JSON);
+  try {
+    // إذا كان هناك معامل data، معناه طلب من الموقع
+    if (e.parameter.data) {
+      const data = JSON.parse(e.parameter.data);
+      const action = data.action;
+      
+      Logger.log('📥 Action received (GET): ' + action);
+      Logger.log('📦 Data: ' + JSON.stringify(data));
+      
+      if (action === 'getAll') {
+        return getAllData();
+      } else if (action === 'addDeposit') {
+        return addDeposit(data);
+      } else if (action === 'updateDepositStatus') {
+        return updateDepositStatus(data);
+      } else if (action === 'addExpense') {
+        return addExpense(data);
+      } else if (action === 'addWithdrawal') {
+        return addWithdrawal(data);
+      } else if (action === 'updateWithdrawalStatus') {
+        return updateWithdrawalStatus(data);
+      } else if (action === 'deleteDeposit') {
+        return deleteDeposit(data);
+      } else if (action === 'deleteExpense') {
+        return deleteExpense(data);
+      } else if (action === 'deleteWithdrawal') {
+        return deleteWithdrawal(data);
+      }
+      
+      return createResponse({status: 'error', message: 'Unknown action: ' + action});
+    }
+    
+    // رد افتراضي للتحقق من أن الـ API يعمل
+    return ContentService.createTextOutput(JSON.stringify({status: 'ok', message: 'Flosna API is running'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    Logger.log('❌ Error in doGet: ' + error.toString());
+    return createResponse({status: 'error', message: error.toString()});
+  }
 }
 
 function doPost(e) {

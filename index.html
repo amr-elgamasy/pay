@@ -658,10 +658,13 @@
             try {
                 const payload = {action: action, ...data};
                 
-                const response = await fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
+                // استخدام GET بدلاً من POST لتجنب مشاكل CORS
+                const url = new URL(GOOGLE_SHEETS_CONFIG.scriptUrl);
+                url.searchParams.append('data', JSON.stringify(payload));
+                
+                const response = await fetch(url.toString(), {
+                    method: 'GET',
+                    redirect: 'follow'
                 });
                 
                 const result = await response.json();
