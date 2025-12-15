@@ -2097,29 +2097,7 @@
         };
 
         // ========== تحديث addExpense لإضافة التصنيف ==========
-        const originalAddExpense = addExpense;
-        addExpense = function() {
-            const description = document.getElementById('expense-description').value;
-            const amount = parseInt(document.getElementById('expense-amount').value);
-            const category = document.getElementById('expense-category').value;
-            
-            if (!description || !amount) { showToast('يرجى ملء جميع الحقول', 'warning'); return; }
-            
-            const newExpense = {
-                id: Date.now(),
-                description: description,
-                amount: amount,
-                category: category,
-                date: new Date().toLocaleDateString('ar-EG')
-            };
-            appData.expenses.push(newExpense);
-            saveData();
-            updateUI();
-            updateAdminDashboard();
-            document.getElementById('expense-form').reset();
-            addActivity('expense', `تم إضافة مصروف: ${description} - ${category}`);
-            showToast('تم إضافة المصروف بنجاح', 'success');
-        };
+        // تم دمج هذه الدالة مع الدالة الأساسية addExpense أعلاه
 
         // تحميل سجل الأنشطة عند بدء التطبيق
         document.addEventListener('DOMContentLoaded', function() {
