@@ -895,10 +895,11 @@
                 // إرسال إلى Google Sheets
                 const result = await sendToGoogleSheets('addDeposit', {
                     ID: newDeposit.id,
-                    التاريخ: newDeposit.date,
                     الاسم: name,
                     الهاتف: phone,
                     المبلغ: amount,
+                    التاريخ: newDeposit.date,
+                    الحالة: 'معلق',
                     الصورة: compressedImage
                 });
                 
@@ -927,7 +928,7 @@
             }
         }
 
-        function addWithdrawal() {
+        async function addWithdrawal() {
             const name = document.getElementById('withdrawal-name').value;
             const phone = document.getElementById('withdrawal-phone').value;
             const amount = parseInt(document.getElementById('withdrawal-amount').value);
@@ -948,11 +949,9 @@
                 status: 'pending'
             };
             
-            appData.withdrawals.push(newWithdrawal);
-            saveData();
-            
-            // إرسال إلى Google Sheets - ورقة السحوبات
-            sendToGoogleSheets('السحوبات_المعلقة', {
+            // إرسال إلى Google Sheets أولاً
+            const result = await sendToGoogleSheets('addWithdrawal', {
+                ID: newWithdrawal.id,
                 التاريخ: newWithdrawal.date,
                 الاسم: name,
                 الهاتف: phone,
@@ -960,6 +959,14 @@
                 السبب: reason || 'لا يوجد',
                 الحالة: 'معلق'
             });
+            
+            if (result && result.status === 'success') {
+                appData.withdrawals.push(newWithdrawal);
+                saveData();
+            } else {
+                showToast('فشل إضافة طلب السحب، حاول مرة أخرى', 'error');
+                return;
+            }
             
             updateUI();
             document.getElementById('withdrawal-form').reset();
@@ -1012,17 +1019,24 @@
             if (!description || !amount) { showToast('يرجى ملء جميع الحقول', 'warning'); return; }
             
             const newExpense = {id: Date.now(), description: description, category: category, amount: amount, date: new Date().toLocaleDateString('ar-EG')};
-            appData.expenses.push(newExpense);
-            saveData();
-            console.log('💾 تم حفظ المصروف محلياً');
             
-            // إرسال إلى Google Sheets - ورقة المصروفات
-            sendToGoogleSheets('المصروفات', {
+            // إرسال إلى Google Sheets أولاً
+            const result = await sendToGoogleSheets('addExpense', {
+                ID: newExpense.id,
                 التاريخ: newExpense.date,
                 الوصف: description,
                 الفئة: category,
                 المبلغ: amount
             });
+            
+            if (result && result.status === 'success') {
+                appData.expenses.push(newExpense);
+                saveData();
+                console.log('💾 تم حفظ المصروف محلياً');
+            } else {
+                showToast('فشل إضافة المصروف، حاول مرة أخرى', 'error');
+                return;
+            }
             
             // إرسال إشعار Telegram
             console.log('📱 جاري تحضير إشعار Telegram للمصروف...');
