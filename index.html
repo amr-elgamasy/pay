@@ -343,11 +343,6 @@
                     </div>
                     
                     <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
-                        <h2 class="card-header"><i class="fas fa-paper-plane"></i> اختبار إشعارات Telegram</h2>
-                        <button type="button" class="btn" onclick="testTelegram()" style="width: 100%;"><i class="fas fa-telegram"></i> إرسال رسالة اختبار</button>
-                    </div>
-                    
-                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="150">
                         <h2 class="card-header"><i class="fas fa-cash-register"></i> إضافة مصروفات</h2>
                         <form id="expense-form">
                             <div class="form-group">
@@ -698,13 +693,12 @@
         // ========== دوال Telegram ==========
         async function sendTelegramNotification(message) {
             if (!TELEGRAM_CONFIG.enabled || !TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) {
-                console.log('Telegram غير مفعل');
+                console.warn('⚠️ Telegram غير مفعل أو معلومات الاتصال ناقصة');
                 return;
             }
 
             console.log('🔄 جاري إرسال الإشعار إلى Telegram...');
-            console.log('Bot Token:', TELEGRAM_CONFIG.botToken.substring(0, 10) + '...');
-            console.log('Chat ID:', TELEGRAM_CONFIG.chatId);
+            console.log('📤 الرسالة:', message);
 
             try {
                 const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
@@ -714,7 +708,8 @@
                     parse_mode: 'HTML'
                 };
                 
-                console.log('📤 البيانات المرسلة:', payload);
+                console.log('🌐 URL:', url.substring(0, 50) + '...');
+                console.log('📦 Payload:', JSON.stringify(payload).substring(0, 100) + '...');
                 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -723,17 +718,20 @@
                 });
                 
                 const result = await response.json();
-                console.log('📥 الرد من Telegram:', result);
+                console.log('📥 الرد من Telegram API:', result);
                 
                 if (result.ok) {
                     console.log('✅ تم إرسال الإشعار إلى Telegram بنجاح');
+                    return true;
                 } else {
                     console.error('❌ خطأ من Telegram API:', result);
-                    showToast('فشل إرسال الإشعار: ' + (result.description || 'خطأ غير معروف'), 'error');
+                    console.error('وصف الخطأ:', result.description);
+                    return false;
                 }
             } catch (error) {
                 console.error('❌ خطأ في إرسال الإشعار إلى Telegram:', error);
-                showToast('خطأ في الاتصال بـ Telegram: ' + error.message, 'error');
+                console.error('تفاصيل الخطأ:', error.message);
+                return false;
             }
         }
 
@@ -1352,23 +1350,6 @@
             }
         }
 
-        // اختبار Telegram
-        async function testTelegram() {
-            const message = `<b>🧪 رسالة اختبار من فلوسنا</b>
-
-<b>📋 الحالة:</b> Telegram يعمل بشكل صحيح ✅
-<b>⏰ الوقت:</b> ${new Date().toLocaleString('ar-EG')}
-
-<i>إذا وصلتك هذه الرسالة، فإن الإشعارات تعمل بنجاح!</i>`;
-            
-            try {
-                await sendTelegramNotification(message);
-                showToast('تم إرسال رسالة الاختبار، تحقق من Telegram', 'success');
-            } catch (error) {
-                showToast('فشل إرسال رسالة الاختبار', 'error');
-            }
-        }
-
         function getStatusText(status) {
             switch(status) {
                 case 'pending': return 'معلق';
@@ -1450,15 +1431,6 @@
         }
 
         // ========== طباعة التقارير ==========
-        function getStatusText(status) {
-            const statusTexts = {
-                'approved': 'مقبول',
-                'pending': 'معلق',
-                'rejected': 'مرفوض'
-            };
-            return statusTexts[status] || status;
-        }
-
         function printBalanceReport() {
             const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, d) => sum + d.amount, 0);
             const totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
