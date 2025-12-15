@@ -895,7 +895,7 @@
                     proof: compressedImage
                 };
                 
-                // إرسال إلى Google Sheets
+                // إرسال إلى Google Sheets (بدون الصورة - الصورة كبيرة جداً للـ URL)
                 const result = await sendToGoogleSheets('addDeposit', {
                     ID: newDeposit.id,
                     الاسم: name,
@@ -903,7 +903,7 @@
                     المبلغ: amount,
                     التاريخ: newDeposit.date,
                     الحالة: 'معلق',
-                    الصورة: compressedImage
+                    الصورة: '' // الصورة محفوظة في LocalStorage فقط
                 });
                 
                 if (result && result.status === 'success') {
