@@ -1032,11 +1032,14 @@
                 المبلغ: amount
             });
             
+            console.log('📤 نتيجة إرسال المصروف:', result);
+            
             if (result && result.status === 'success') {
                 appData.expenses.push(newExpense);
                 saveData();
                 console.log('💾 تم حفظ المصروف محلياً');
             } else {
+                console.error('❌ فشل إرسال المصروف:', result);
                 showToast('فشل إضافة المصروف، حاول مرة أخرى', 'error');
                 return;
             }
