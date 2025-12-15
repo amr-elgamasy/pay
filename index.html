@@ -622,10 +622,14 @@
 
             showLoading(true);
             try {
-                const response = await fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({action: 'getAll'})
+                // استخدام GET بدلاً من POST لتجنب مشاكل CORS
+                const payload = {action: 'getAll'};
+                const url = new URL(GOOGLE_SHEETS_CONFIG.scriptUrl);
+                url.searchParams.append('data', JSON.stringify(payload));
+                
+                const response = await fetch(url.toString(), {
+                    method: 'GET',
+                    redirect: 'follow'
                 });
                 
                 const result = await response.json();
@@ -1023,13 +1027,13 @@
             
             const newExpense = {id: Date.now(), description: description, category: category, amount: amount, date: new Date().toLocaleDateString('ar-EG')};
             
-            // إرسال إلى Google Sheets أولاً
+            // إرسال إلى Google Sheets أولاً (الترتيب: ID | الوصف | الفئة | المبلغ | التاريخ)
             const result = await sendToGoogleSheets('addExpense', {
                 ID: newExpense.id,
-                التاريخ: newExpense.date,
                 الوصف: description,
                 الفئة: category,
-                المبلغ: amount
+                المبلغ: amount,
+                التاريخ: newExpense.date
             });
             
             console.log('📤 نتيجة إرسال المصروف:', result);
