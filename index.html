@@ -1003,14 +1003,14 @@
                 status: 'pending'
             };
             
-            // إرسال إلى Google Sheets أولاً
+            // إرسال إلى Google Sheets أولاً (الترتيب: ID | الاسم | الهاتف | المبلغ | السبب | التاريخ | الحالة)
             const result = await sendToGoogleSheets('addWithdrawal', {
                 ID: newWithdrawal.id,
-                التاريخ: newWithdrawal.date,
                 الاسم: name,
                 الهاتف: phone,
                 المبلغ: amount,
                 السبب: reason || 'لا يوجد',
+                التاريخ: newWithdrawal.date,
                 الحالة: 'معلق'
             });
             
