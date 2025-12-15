@@ -1,161 +1,350 @@
-// Google Apps Script - انسخ والصق هذا الكود في Google Apps Script
+// ============================================================
+// 🌐 Google Apps Script للربط مع موقع فلوسنا
+// ============================================================
+// رابط الجدول: https://docs.google.com/spreadsheets/d/1w9UXX3EKLL6zJ4sPCSPFA3S_yC2harQtHAIX_eUqRJQ/edit
 
-/**
- * وظيفة لاستقبال البيانات من التطبيق وإضافتها إلى Google Sheets
- * 
- * كيفية الاستخدام:
- * 1. افتح Google Sheets الخاص بك
- * 2. اذهب إلى Extensions > Apps Script
- * 3. امسح أي كود موجود والصق هذا الكود
- * 4. احفظ (Ctrl+S)
- * 5. انقر Deploy > New deployment
- * 6. اختر Web app
- * 7. Execute as: Me
- * 8. Who has access: Anyone
- * 9. انقر Deploy وانسخ الرابط
- */
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({status: 'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
 function doPost(e) {
   try {
-    // قراءة البيانات المرسلة
     const data = JSON.parse(e.postData.contents);
-    const sheetName = data.sheet;
-    const rowData = data.data;
+    const action = data.action;
     
-    // الحصول على الورقة المطلوبة
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(sheetName);
+    Logger.log('📥 Action received: ' + action);
+    Logger.log('📦 Data: ' + JSON.stringify(data));
     
-    // إذا لم تكن الورقة موجودة، أنشئها
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(sheetName);
-      
-      // إضافة رؤوس الأعمدة حسب نوع الورقة
-      const headers = getHeadersForSheet(sheetName);
-      if (headers.length > 0) {
-        sheet.appendRow(headers);
-        
-        // تنسيق رؤوس الأعمدة
-        const headerRange = sheet.getRange(1, 1, 1, headers.length);
-        headerRange.setFontWeight('bold');
-        headerRange.setBackground('#4285f4');
-        headerRange.setFontColor('#ffffff');
-        headerRange.setHorizontalAlignment('center');
-      }
+    if (action === 'getAll') {
+      return getAllData();
+    } else if (action === 'addDeposit') {
+      return addDeposit(data);
+    } else if (action === 'updateDepositStatus') {
+      return updateDepositStatus(data);
+    } else if (action === 'addExpense') {
+      return addExpense(data);
+    } else if (action === 'addWithdrawal') {
+      return addWithdrawal(data);
+    } else if (action === 'updateWithdrawalStatus') {
+      return updateWithdrawalStatus(data);
+    } else if (action === 'deleteDeposit') {
+      return deleteDeposit(data);
+    } else if (action === 'deleteExpense') {
+      return deleteExpense(data);
+    } else if (action === 'deleteWithdrawal') {
+      return deleteWithdrawal(data);
     }
     
-    // إضافة البيانات كصف جديد
-    const values = Object.values(rowData);
-    sheet.appendRow(values);
-    
-    // تنسيق آخر صف
-    const lastRow = sheet.getLastRow();
-    const range = sheet.getRange(lastRow, 1, 1, values.length);
-    range.setHorizontalAlignment('center');
-    
-    // تلوين الصف بناءً على نوع الورقة
-    colorRowBySheet(sheet, lastRow, sheetName);
-    
-    // تعديل عرض الأعمدة تلقائياً
-    sheet.autoResizeColumns(1, values.length);
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      status: 'success',
-      message: 'تم إضافة البيانات بنجاح',
-      sheet: sheetName,
-      row: lastRow
-    })).setMimeType(ContentService.MimeType.JSON);
-    
+    return createResponse({status: 'error', message: 'Unknown action: ' + action});
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({
-      status: 'error',
-      message: error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
+    Logger.log('❌ Error: ' + error.toString());
+    return createResponse({status: 'error', message: error.toString()});
   }
 }
 
-function doGet(e) {
-  return ContentService.createTextOutput(
-    'Google Sheets API للمحفظة الجماعية - فلوسنا 🎉\n' +
-    'الـ API يعمل بنجاح! ✅'
-  );
+function createResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
-/**
- * دالة للحصول على رؤوس الأعمدة حسب نوع الورقة
- */
-function getHeadersForSheet(sheetName) {
-  const headersMap = {
-    'الإيداعات_المعلقة': ['التاريخ', 'الاسم', 'الهاتف', 'المبلغ', 'الحالة'],
-    'الإيداعات_المقبولة': ['التاريخ', 'الاسم', 'الهاتف', 'المبلغ', 'تاريخ الموافقة'],
-    'الإيداعات_المرفوضة': ['التاريخ', 'الاسم', 'الهاتف', 'المبلغ', 'تاريخ الرفض'],
-    'المصروفات': ['التاريخ', 'الوصف', 'الفئة', 'المبلغ']
-  };
+function getAllData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   
-  return headersMap[sheetName] || [];
-}
-
-/**
- * دالة لتلوين الصفوف حسب نوع الورقة
- */
-function colorRowBySheet(sheet, row, sheetName) {
-  const range = sheet.getRange(row, 1, 1, sheet.getLastColumn());
+  const deposits = readSheet(ss, 'الإيداعات_المعلقة')
+    .concat(readSheet(ss, 'الإيداعات_المقبولة'))
+    .concat(readSheet(ss, 'الإيداعات_المرفوضة'));
   
-  switch(sheetName) {
-    case 'الإيداعات_المعلقة':
-      range.setBackground('#fff3cd'); // أصفر فاتح
-      break;
-    case 'الإيداعات_المقبولة':
-      range.setBackground('#d4edda'); // أخضر فاتح
-      break;
-    case 'الإيداعات_المرفوضة':
-      range.setBackground('#f8d7da'); // أحمر فاتح
-      break;
-    case 'المصروفات':
-      range.setBackground('#d1ecf1'); // أزرق فاتح
-      break;
-    default:
-      range.setBackground('#ffffff'); // أبيض
-  }
-}
-
-/**
- * دالة اختيارية لإنشاء الأوراق الأربعة تلقائياً
- * قم بتشغيلها مرة واحدة من القائمة في Apps Script
- */
-function createAllSheets() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const sheetNames = [
-    'الإيداعات_المعلقة',
-    'الإيداعات_المقبولة', 
-    'الإيداعات_المرفوضة',
-    'المصروفات'
-  ];
+  const expenses = readSheet(ss, 'المصروفات');
   
-  sheetNames.forEach(sheetName => {
-    let sheet = spreadsheet.getSheetByName(sheetName);
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(sheetName);
-      
-      // إضافة رؤوس الأعمدة
-      const headers = getHeadersForSheet(sheetName);
-      if (headers.length > 0) {
-        sheet.appendRow(headers);
-        
-        // تنسيق رؤوس الأعمدة
-        const headerRange = sheet.getRange(1, 1, 1, headers.length);
-        headerRange.setFontWeight('bold');
-        headerRange.setBackground('#4285f4');
-        headerRange.setFontColor('#ffffff');
-        headerRange.setHorizontalAlignment('center');
-        
-        // تعديل عرض الأعمدة
-        sheet.autoResizeColumns(1, headers.length);
-      }
-      
-      Logger.log('تم إنشاء الورقة: ' + sheetName);
+  const withdrawals = readSheet(ss, 'السحوبات_المعلقة')
+    .concat(readSheet(ss, 'السحوبات_المقبولة'))
+    .concat(readSheet(ss, 'السحوبات_المرفوضة'));
+  
+  Logger.log('✅ Data retrieved: ' + deposits.length + ' deposits, ' + expenses.length + ' expenses, ' + withdrawals.length + ' withdrawals');
+  
+  return createResponse({
+    status: 'success',
+    data: {
+      deposits: deposits,
+      expenses: expenses,
+      withdrawals: withdrawals
     }
   });
+}
+
+function readSheet(ss, sheetName) {
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    Logger.log('⚠️ Sheet not found: ' + sheetName);
+    return [];
+  }
   
-  Logger.log('تم إنشاء جميع الأوراق بنجاح!');
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return []; // فقط العناوين
+  
+  const headers = data[0];
+  const rows = data.slice(1);
+  
+  return rows.filter(row => row[0] !== '').map(row => {
+    const obj = {};
+    headers.forEach((header, index) => {
+      obj[header] = row[index];
+    });
+    return obj;
+  });
+}
+
+// ============================================================
+// 📝 إضافة إيداع جديد
+// ترتيب الأعمدة: ID | الاسم | الهاتف | المبلغ | التاريخ | الحالة | صورة_التحويل
+// ============================================================
+function addDeposit(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('الإيداعات_المعلقة');
+  
+  if (!sheet) {
+    return createResponse({status: 'error', message: 'Sheet not found: الإيداعات_المعلقة'});
+  }
+  
+  sheet.appendRow([
+    data.ID,
+    data.الاسم,
+    data.الهاتف,
+    data.المبلغ,
+    data.التاريخ,
+    data.الحالة || 'معلق',
+    data.الصورة || ''
+  ]);
+  
+  Logger.log('✅ Deposit added: ' + data.ID);
+  return createResponse({status: 'success', message: 'Deposit added successfully'});
+}
+
+// ============================================================
+// 🔄 تحديث حالة الإيداع
+// ============================================================
+function updateDepositStatus(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const pendingSheet = ss.getSheetByName('الإيداعات_المعلقة');
+  const targetSheet = data.الحالة === 'approved' 
+    ? ss.getSheetByName('الإيداعات_المقبولة')
+    : ss.getSheetByName('الإيداعات_المرفوضة');
+  
+  if (!pendingSheet || !targetSheet) {
+    return createResponse({status: 'error', message: 'Sheets not found'});
+  }
+  
+  const pendingData = pendingSheet.getDataRange().getValues();
+  
+  for (let i = 1; i < pendingData.length; i++) {
+    if (pendingData[i][0] == data.ID) {
+      // نقل للورقة الجديدة (بدون صورة)
+      targetSheet.appendRow([
+        pendingData[i][0], // ID
+        pendingData[i][1], // الاسم
+        pendingData[i][2], // الهاتف
+        pendingData[i][3], // المبلغ
+        pendingData[i][4], // التاريخ
+        data.الحالة === 'approved' ? 'مقبول' : 'مرفوض'
+      ]);
+      
+      // حذف من المعلقة
+      pendingSheet.deleteRow(i + 1);
+      Logger.log('✅ Deposit status updated: ' + data.ID + ' -> ' + data.الحالة);
+      return createResponse({status: 'success'});
+    }
+  }
+  
+  return createResponse({status: 'error', message: 'Deposit not found: ' + data.ID});
+}
+
+// ============================================================
+// 💰 إضافة مصروف
+// ترتيب الأعمدة: ID | التاريخ | الوصف | الفئة | المبلغ
+// ============================================================
+function addExpense(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('المصروفات');
+  
+  if (!sheet) {
+    return createResponse({status: 'error', message: 'Sheet not found: المصروفات'});
+  }
+  
+  sheet.appendRow([
+    data.ID,
+    data.التاريخ,
+    data.الوصف,
+    data.الفئة,
+    data.المبلغ
+  ]);
+  
+  Logger.log('✅ Expense added: ' + data.ID);
+  return createResponse({status: 'success', message: 'Expense added successfully'});
+}
+
+// ============================================================
+// 📤 إضافة سحب
+// ترتيب الأعمدة: ID | التاريخ | الاسم | الهاتف | المبلغ | السبب | الحالة
+// ============================================================
+function addWithdrawal(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('السحوبات_المعلقة');
+  
+  if (!sheet) {
+    return createResponse({status: 'error', message: 'Sheet not found: السحوبات_المعلقة'});
+  }
+  
+  sheet.appendRow([
+    data.ID,
+    data.التاريخ,
+    data.الاسم,
+    data.الهاتف,
+    data.المبلغ,
+    data.السبب,
+    data.الحالة || 'معلق'
+  ]);
+  
+  Logger.log('✅ Withdrawal added: ' + data.ID);
+  return createResponse({status: 'success', message: 'Withdrawal added successfully'});
+}
+
+// ============================================================
+// 🔄 تحديث حالة السحب
+// ============================================================
+function updateWithdrawalStatus(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const pendingSheet = ss.getSheetByName('السحوبات_المعلقة');
+  
+  if (!pendingSheet) {
+    return createResponse({status: 'error', message: 'Sheet not found: السحوبات_المعلقة'});
+  }
+  
+  if (data.الحالة === 'approved') {
+    const targetSheet = ss.getSheetByName('السحوبات_المقبولة');
+    if (!targetSheet) {
+      return createResponse({status: 'error', message: 'Sheet not found: السحوبات_المقبولة'});
+    }
+    
+    const pendingData = pendingSheet.getDataRange().getValues();
+    
+    for (let i = 1; i < pendingData.length; i++) {
+      if (pendingData[i][0] == data.ID) {
+        targetSheet.appendRow([
+          pendingData[i][0], // ID
+          pendingData[i][1], // التاريخ
+          pendingData[i][2], // الاسم
+          pendingData[i][3], // الهاتف
+          pendingData[i][4], // المبلغ
+          pendingData[i][5], // السبب
+          'مقبول'
+        ]);
+        
+        pendingSheet.deleteRow(i + 1);
+        Logger.log('✅ Withdrawal approved: ' + data.ID);
+        return createResponse({status: 'success'});
+      }
+    }
+  } else if (data.الحالة === 'rejected') {
+    const targetSheet = ss.getSheetByName('السحوبات_المرفوضة');
+    if (!targetSheet) {
+      return createResponse({status: 'error', message: 'Sheet not found: السحوبات_المرفوضة'});
+    }
+    
+    const pendingData = pendingSheet.getDataRange().getValues();
+    
+    for (let i = 1; i < pendingData.length; i++) {
+      if (pendingData[i][0] == data.ID) {
+        targetSheet.appendRow([
+          pendingData[i][0], // ID
+          pendingData[i][1], // التاريخ
+          pendingData[i][2], // الاسم
+          pendingData[i][3], // الهاتف
+          pendingData[i][4], // المبلغ
+          pendingData[i][5], // السبب
+          'مرفوض'
+        ]);
+        
+        pendingSheet.deleteRow(i + 1);
+        Logger.log('✅ Withdrawal rejected: ' + data.ID);
+        return createResponse({status: 'success'});
+      }
+    }
+  }
+  
+  return createResponse({status: 'error', message: 'Withdrawal not found: ' + data.ID});
+}
+
+// ============================================================
+// 🗑️ حذف إيداع
+// ============================================================
+function deleteDeposit(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ['الإيداعات_المعلقة', 'الإيداعات_المقبولة', 'الإيداعات_المرفوضة'];
+  
+  for (const sheetName of sheets) {
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) continue;
+    
+    const sheetData = sheet.getDataRange().getValues();
+    
+    for (let i = 1; i < sheetData.length; i++) {
+      if (sheetData[i][0] == data.ID) {
+        sheet.deleteRow(i + 1);
+        Logger.log('✅ Deposit deleted: ' + data.ID);
+        return createResponse({status: 'success'});
+      }
+    }
+  }
+  
+  return createResponse({status: 'error', message: 'Deposit not found: ' + data.ID});
+}
+
+// ============================================================
+// 🗑️ حذف مصروف
+// ============================================================
+function deleteExpense(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('المصروفات');
+  
+  if (!sheet) {
+    return createResponse({status: 'error', message: 'Sheet not found: المصروفات'});
+  }
+  
+  const sheetData = sheet.getDataRange().getValues();
+  
+  for (let i = 1; i < sheetData.length; i++) {
+    if (sheetData[i][0] == data.ID) {
+      sheet.deleteRow(i + 1);
+      Logger.log('✅ Expense deleted: ' + data.ID);
+      return createResponse({status: 'success'});
+    }
+  }
+  
+  return createResponse({status: 'error', message: 'Expense not found: ' + data.ID});
+}
+
+// ============================================================
+// 🗑️ حذف سحب
+// ============================================================
+function deleteWithdrawal(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ['السحوبات_المعلقة', 'السحوبات_المقبولة', 'السحوبات_المرفوضة'];
+  
+  for (const sheetName of sheets) {
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) continue;
+    
+    const sheetData = sheet.getDataRange().getValues();
+    
+    for (let i = 1; i < sheetData.length; i++) {
+      if (sheetData[i][0] == data.ID) {
+        sheet.deleteRow(i + 1);
+        Logger.log('✅ Withdrawal deleted: ' + data.ID);
+        return createResponse({status: 'success'});
+      }
+    }
+  }
+  
+  return createResponse({status: 'error', message: 'Withdrawal not found: ' + data.ID});
 }
