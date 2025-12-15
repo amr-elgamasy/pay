@@ -179,10 +179,8 @@
                             <input type="file" id="deposit-proof" accept="image/*" required>
                             <img id="proof-preview" class="image-preview" alt="معاينة الصورة">
                         </div>
-                        <div class="wallet-info">
-                            <p><i class="fas fa-mobile-alt"></i> رقم المحفظة:</p>
-                            <p class="wallet-number">01097612534</p>
-                            <p><i class="fas fa-info-circle"></i> يرجى إرفاق صورة إثبات التحويل بعد الإيداع</p>
+                        <div class="wallet-info" id="payment-methods-display">
+                            <!-- سيتم عرض طرق الدفع ديناميكياً -->
                         </div>
                         <button type="submit"><i class="fas fa-paper-plane"></i> إضافة الإيداع</button>
                     </form>
@@ -522,6 +520,98 @@
                         </div>
                     </div>
 
+                    <!-- إعدادات طرق الدفع -->
+                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <i class="fas fa-credit-card"></i> إعدادات طرق الدفع
+                        </h2>
+                        <div style="padding: 1.5rem;">
+                            <form id="payment-settings-form" style="display: grid; gap: 1.5rem;">
+                                
+                                <!-- إنستاباي -->
+                                <div style="background: rgba(102, 126, 234, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(102, 126, 234, 0.2);">
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                        <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #667eea;"></i>
+                                        <h3 style="margin: 0; color: #667eea;">إنستاباي (Instapay)</h3>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="instapay-number"><i class="fas fa-hashtag"></i> رقم الهاتف</label>
+                                        <input type="tel" id="instapay-number" placeholder="مثال: 01097612534">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="instapay-name"><i class="fas fa-user"></i> الاسم المسجل</label>
+                                        <input type="text" id="instapay-name" placeholder="مثال: محمد أحمد">
+                                    </div>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                        <input type="checkbox" id="instapay-enabled" style="width: 20px; height: 20px; cursor: pointer;">
+                                        <span>تفعيل هذه الطريقة</span>
+                                    </label>
+                                </div>
+
+                                <!-- محافظ إلكترونية -->
+                                <div style="background: rgba(16, 185, 129, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                        <i class="fas fa-wallet" style="font-size: 2rem; color: #10b981;"></i>
+                                        <h3 style="margin: 0; color: #10b981;">محافظ إلكترونية</h3>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ewallet-type"><i class="fas fa-list"></i> نوع المحفظة</label>
+                                        <select id="ewallet-type" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                                            <option value="">اختر نوع المحفظة</option>
+                                            <option value="vodafone-cash">فودافون كاش</option>
+                                            <option value="orange-cash">أورانج كاش</option>
+                                            <option value="etisalat-cash">اتصالات كاش</option>
+                                            <option value="we-pay">WE Pay</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ewallet-number"><i class="fas fa-hashtag"></i> رقم المحفظة</label>
+                                        <input type="tel" id="ewallet-number" placeholder="مثال: 01012345678">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ewallet-name"><i class="fas fa-user"></i> الاسم المسجل</label>
+                                        <input type="text" id="ewallet-name" placeholder="مثال: محمد أحمد">
+                                    </div>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                        <input type="checkbox" id="ewallet-enabled" style="width: 20px; height: 20px; cursor: pointer;">
+                                        <span>تفعيل هذه الطريقة</span>
+                                    </label>
+                                </div>
+
+                                <!-- حساب بنكي -->
+                                <div style="background: rgba(239, 68, 68, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                        <i class="fas fa-university" style="font-size: 2rem; color: #ef4444;"></i>
+                                        <h3 style="margin: 0; color: #ef4444;">حساب بنكي</h3>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bank-name"><i class="fas fa-building"></i> اسم البنك</label>
+                                        <input type="text" id="bank-name" placeholder="مثال: البنك الأهلي المصري">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bank-account"><i class="fas fa-hashtag"></i> رقم الحساب</label>
+                                        <input type="text" id="bank-account" placeholder="مثال: 1234567890">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bank-holder"><i class="fas fa-user"></i> اسم صاحب الحساب</label>
+                                        <input type="text" id="bank-holder" placeholder="مثال: محمد أحمد">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bank-iban"><i class="fas fa-barcode"></i> IBAN (اختياري)</label>
+                                        <input type="text" id="bank-iban" placeholder="مثال: EG380002001234567890123456789">
+                                    </div>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                        <input type="checkbox" id="bank-enabled" style="width: 20px; height: 20px; cursor: pointer;">
+                                        <span>تفعيل هذه الطريقة</span>
+                                    </label>
+                                </div>
+
+                                <button type="button" onclick="savePaymentSettings()" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600; padding: 1rem;">
+                                    <i class="fas fa-save"></i> حفظ التغييرات
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                    
                 </div>
             </section>
@@ -552,7 +642,18 @@
             // استخدام font helvetica كبديل آمن
         }
 
-        let appData = {deposits: [], expenses: [], withdrawals: [], adminLoggedIn: false, adminCredentials: {username: "admin", password: "admin123"}};
+        let appData = {
+            deposits: [], 
+            expenses: [], 
+            withdrawals: [], 
+            adminLoggedIn: false, 
+            adminCredentials: {username: "admin", password: "admin123"},
+            paymentMethods: {
+                instapay: {enabled: false, number: '', name: ''},
+                ewallet: {enabled: false, type: '', number: '', name: ''},
+                bank: {enabled: false, bankName: '', account: '', holder: '', iban: ''}
+            }
+        };
 
         // ========== نظام Toast Notifications ==========
         function showToast(message, type = 'success') {
@@ -862,8 +963,151 @@
             loadData();
             setupEventListeners();
             checkAdminLoginStatus();
+            loadPaymentSettings();
             updateUI();
         });
+
+        // ========== إدارة طرق الدفع ==========
+        
+        function savePaymentSettings() {
+            const paymentMethods = {
+                instapay: {
+                    enabled: document.getElementById('instapay-enabled').checked,
+                    number: document.getElementById('instapay-number').value,
+                    name: document.getElementById('instapay-name').value
+                },
+                ewallet: {
+                    enabled: document.getElementById('ewallet-enabled').checked,
+                    type: document.getElementById('ewallet-type').value,
+                    number: document.getElementById('ewallet-number').value,
+                    name: document.getElementById('ewallet-name').value
+                },
+                bank: {
+                    enabled: document.getElementById('bank-enabled').checked,
+                    bankName: document.getElementById('bank-name').value,
+                    account: document.getElementById('bank-account').value,
+                    holder: document.getElementById('bank-holder').value,
+                    iban: document.getElementById('bank-iban').value
+                }
+            };
+            
+            appData.paymentMethods = paymentMethods;
+            saveDataLocally();
+            
+            showToast('تم حفظ إعدادات طرق الدفع بنجاح', 'success');
+            updatePaymentMethodsDisplay();
+        }
+
+        function loadPaymentSettings() {
+            if (!appData.paymentMethods) {
+                appData.paymentMethods = {
+                    instapay: {enabled: false, number: '', name: ''},
+                    ewallet: {enabled: false, type: '', number: '', name: ''},
+                    bank: {enabled: false, bankName: '', account: '', holder: '', iban: ''}
+                };
+            }
+            
+            const pm = appData.paymentMethods;
+            
+            // تحميل إنستاباي
+            if (document.getElementById('instapay-enabled')) {
+                document.getElementById('instapay-enabled').checked = pm.instapay.enabled || false;
+                document.getElementById('instapay-number').value = pm.instapay.number || '';
+                document.getElementById('instapay-name').value = pm.instapay.name || '';
+            }
+            
+            // تحميل المحافظ
+            if (document.getElementById('ewallet-enabled')) {
+                document.getElementById('ewallet-enabled').checked = pm.ewallet.enabled || false;
+                document.getElementById('ewallet-type').value = pm.ewallet.type || '';
+                document.getElementById('ewallet-number').value = pm.ewallet.number || '';
+                document.getElementById('ewallet-name').value = pm.ewallet.name || '';
+            }
+            
+            // تحميل البنك
+            if (document.getElementById('bank-enabled')) {
+                document.getElementById('bank-enabled').checked = pm.bank.enabled || false;
+                document.getElementById('bank-name').value = pm.bank.bankName || '';
+                document.getElementById('bank-account').value = pm.bank.account || '';
+                document.getElementById('bank-holder').value = pm.bank.holder || '';
+                document.getElementById('bank-iban').value = pm.bank.iban || '';
+            }
+            
+            updatePaymentMethodsDisplay();
+        }
+
+        function updatePaymentMethodsDisplay() {
+            const container = document.getElementById('payment-methods-display');
+            if (!container) return;
+            
+            const pm = appData.paymentMethods;
+            let html = '<div style="margin-bottom: 1rem;"><strong><i class="fas fa-info-circle"></i> طرق الدفع المتاحة:</strong></div>';
+            
+            let hasAnyMethod = false;
+            
+            // إنستاباي
+            if (pm.instapay && pm.instapay.enabled && pm.instapay.number) {
+                hasAnyMethod = true;
+                html += `
+                    <div style="background: rgba(102, 126, 234, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; border-right: 4px solid #667eea;">
+                        <p style="margin: 0 0 0.5rem 0;"><i class="fas fa-mobile-alt" style="color: #667eea;"></i> <strong>إنستاباي (Instapay)</strong></p>
+                        <p style="margin: 0; font-size: 1.1rem; color: #667eea; font-weight: bold;">${pm.instapay.number}</p>
+                        ${pm.instapay.name ? `<p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #666;">باسم: ${pm.instapay.name}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            // محفظة إلكترونية
+            if (pm.ewallet && pm.ewallet.enabled && pm.ewallet.number) {
+                hasAnyMethod = true;
+                const walletTypes = {
+                    'vodafone-cash': 'فودافون كاش',
+                    'orange-cash': 'أورانج كاش',
+                    'etisalat-cash': 'اتصالات كاش',
+                    'we-pay': 'WE Pay'
+                };
+                const walletName = walletTypes[pm.ewallet.type] || 'محفظة إلكترونية';
+                
+                html += `
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; border-right: 4px solid #10b981;">
+                        <p style="margin: 0 0 0.5rem 0;"><i class="fas fa-wallet" style="color: #10b981;"></i> <strong>${walletName}</strong></p>
+                        <p style="margin: 0; font-size: 1.1rem; color: #10b981; font-weight: bold;">${pm.ewallet.number}</p>
+                        ${pm.ewallet.name ? `<p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #666;">باسم: ${pm.ewallet.name}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            // حساب بنكي
+            if (pm.bank && pm.bank.enabled && pm.bank.account) {
+                hasAnyMethod = true;
+                html += `
+                    <div style="background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; border-right: 4px solid #ef4444;">
+                        <p style="margin: 0 0 0.5rem 0;"><i class="fas fa-university" style="color: #ef4444;"></i> <strong>حساب بنكي</strong></p>
+                        ${pm.bank.bankName ? `<p style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">${pm.bank.bankName}</p>` : ''}
+                        <p style="margin: 0; font-size: 1.1rem; color: #ef4444; font-weight: bold;">${pm.bank.account}</p>
+                        ${pm.bank.holder ? `<p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #666;">باسم: ${pm.bank.holder}</p>` : ''}
+                        ${pm.bank.iban ? `<p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #666;">IBAN: ${pm.bank.iban}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            if (!hasAnyMethod) {
+                html = `
+                    <div class="wallet-info" style="background: rgba(239, 68, 68, 0.1); border-right: 4px solid var(--danger-color);">
+                        <p><i class="fas fa-exclamation-triangle"></i> لم يتم تفعيل أي طريقة دفع</p>
+                        <p style="font-size: 0.9rem; color: var(--gray-color);">يرجى التواصل مع الإدارة لمعرفة طرق الدفع المتاحة</p>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-color);">
+                        <i class="fas fa-info-circle"></i> يرجى إرفاق صورة إثبات التحويل بعد الإيداع
+                    </p>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
 
         // تحميل البيانات من Google Sheets أو LocalStorage
         async function loadData() {
