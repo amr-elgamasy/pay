@@ -795,6 +795,9 @@
             
             // تنظيف الصور القديمة
             cleanOldImages();
+            
+            // تحديث الواجهة بعد تحميل البيانات
+            updateUI();
         }
         
         // تحويل الحالة من العربية إلى الإنجليزية
@@ -1280,7 +1283,9 @@
 📱 الهاتف: ${deposit.phone}
 💰 المبلغ: ${deposit.amount} جنيه
 📅 التاريخ: ${deposit.date}`;
-                        sendTelegramNotification(message);
+                        sendTelegramNotification(message).catch(err => {
+                            console.error('خطأ في إرسال إشعار Telegram:', err);
+                        });
                     }
                     
                     showToast('تم تحديث حالة الإيداع بنجاح', 'success');
@@ -1317,7 +1322,9 @@
 💰 المبلغ: ${withdrawal.amount} جنيه
 📝 السبب: ${withdrawal.reason}
 📅 التاريخ: ${withdrawal.date}`;
-                        sendTelegramNotification(message);
+                        sendTelegramNotification(message).catch(err => {
+                            console.error('خطأ في إرسال إشعار Telegram:', err);
+                        });
                     }
                     
                     showToast('تم تحديث حالة السحب بنجاح', 'success');
