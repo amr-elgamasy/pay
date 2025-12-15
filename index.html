@@ -28,6 +28,16 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
     
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="text-align: center; color: white;">
+            <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">جاري التحميل...</span>
+            </div>
+            <p style="margin-top: 15px; font-size: 18px;">جاري التحميل من السحابة...</p>
+        </div>
+    </div>
+    
     <header>
         <div class="header-content">
             <div class="logo">
@@ -331,7 +341,8 @@
                             </div>
                         </div>
                     </div>
- <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                    
+                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
                         <h2 class="card-header"><i class="fas fa-cash-register"></i> إضافة مصروفات</h2>
                         <form id="expense-form">
                             <div class="form-group">
@@ -474,6 +485,35 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="75">
+                        <h2 class="card-header"><i class="fas fa-print"></i> طباعة التقارير</h2>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem;">
+                            <button class="btn" onclick="printBalanceReport()" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
+                                <i class="fas fa-file-invoice-dollar"></i> تقرير الرصيد الكامل
+                            </button>
+                            <button class="btn" onclick="printDepositsReport()" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);">
+                                <i class="fas fa-file-download"></i> تقرير الإيداعات
+                            </button>
+                            <button class="btn" onclick="printExpensesWithdrawalsReport()" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);">
+                                <i class="fas fa-file-upload"></i> تقرير المصروفات والسحوبات
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="50" style="border: 2px solid var(--danger-color);">
+                        <h2 class="card-header" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); color: var(--danger-color);">
+                            <i class="fas fa-exclamation-triangle"></i> منطقة الخطر
+                        </h2>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: var(--gray-color); margin-bottom: 1rem;">
+                                <i class="fas fa-info-circle"></i> حذف جميع البيانات سيؤدي لمسح كل الإيداعات والمصروفات والسحوبات بشكل نهائي ولا يمكن التراجع.
+                            </p>
+                            <button class="btn" onclick="deleteAllData()" style="background: linear-gradient(135deg, var(--danger-color) 0%, #b91c1c 100%); width: auto;">
+                                <i class="fas fa-trash-alt"></i> حذف جميع البيانات
+                            </button>
+                        </div>
+                    </div>
 
                    
                 </div>
@@ -558,33 +598,88 @@
 
         // ========== إعدادات Google Sheets و Telegram ==========
         const GOOGLE_SHEETS_CONFIG = {
-            enabled: true, // غير الى true بعد الإعداد
-            scriptUrl: 'https://script.google.com/macros/s/AKfycbwrihLt0eYbjteEznnXUwj5kdv14Ls9gtRqhBDsRKk1dMcYKj0tJ_W07DQ6iQ6QOqSLKA/exec', // ضع رابط Google Apps Script Web App هنا
+            enabled: true, // ✅ مفعّل
+            scriptUrl: 'https://script.google.com/macros/s/AKfycby3T8MiGv9i42M2Mny8Ec8ATZvNXFXlSC8mqRtXasBc4mfKvUlg1_M6loz1hCUlRftcUQ/exec'
         };
 
         const TELEGRAM_CONFIG = {
-            enabled: true, // غير الى true بعد الإعداد
-            botToken: '8299247400:AAHOJU7qIanXJrvHEaryAkx5uL_MK8DTzOg', // ضع Bot Token هنا
-            chatId: '5773416612', // ضع Chat ID هنا
+            enabled: true,
+            botToken: '8299247400:AAGOPKCq13E5bqIEwMjjl-wKm7cAIzaJnKo',
+            chatId: '7639421086'
         };
 
-        // ========== دوال Google Sheets ==========
-        async function sendToGoogleSheets(sheetName, data) {
+        // متغير للتحميل
+        let isLoading = false;
+
+        // ========== دوال Google Sheets (قاعدة البيانات الرئيسية) ==========
+        
+        // جلب جميع البيانات من Google Sheets
+        async function fetchDataFromGoogleSheets() {
             if (!GOOGLE_SHEETS_CONFIG.enabled || !GOOGLE_SHEETS_CONFIG.scriptUrl) {
-                console.log('Google Sheets غير مفعل');
-                return;
+                console.log('⚠️ Google Sheets غير مفعل - استخدام LocalStorage');
+                return null;
             }
 
+            showLoading(true);
             try {
                 const response = await fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({sheet: sheetName, data: data})
+                    body: JSON.stringify({action: 'getAll'})
                 });
-                console.log(`تم إرسال البيانات إلى ${sheetName}`);
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    console.log('✅ تم جلب البيانات من Google Sheets');
+                    return result.data;
+                } else {
+                    console.error('❌ خطأ:', result.message);
+                    showToast('فشل جلب البيانات من السحابة', 'error');
+                    return null;
+                }
             } catch (error) {
-                console.error('خطأ في إرسال البيانات إلى Google Sheets:', error);
+                console.error('❌ خطأ في الاتصال بـ Google Sheets:', error);
+                showToast('خطأ في الاتصال بقاعدة البيانات', 'error');
+                return null;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // إرسال بيانات إلى Google Sheets
+        async function sendToGoogleSheets(action, data) {
+            if (!GOOGLE_SHEETS_CONFIG.enabled || !GOOGLE_SHEETS_CONFIG.scriptUrl) {
+                console.log('⚠️ Google Sheets غير مفعل');
+                return {status: 'error', message: 'Google Sheets not enabled'};
+            }
+
+            showLoading(true);
+            try {
+                const payload = {action: action, ...data};
+                
+                const response = await fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('❌ خطأ في إرسال البيانات:', error);
+                return {status: 'error', message: error.message};
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // عرض/إخفاء شاشة التحميل
+        function showLoading(show) {
+            isLoading = show;
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) {
+                spinner.style.display = show ? 'flex' : 'none';
             }
         }
 
@@ -637,19 +732,64 @@
             updateUI();
         });
 
-        function loadData() {
-            const savedData = localStorage.getItem('flosnaData');
-            if (savedData) {
-                appData = JSON.parse(savedData);
-                // التأكد من وجود مصفوفة السحوبات
-                if (!appData.withdrawals) {
-                    appData.withdrawals = [];
+        // تحميل البيانات من Google Sheets أو LocalStorage
+        async function loadData() {
+            // محاولة جلب البيانات من Google Sheets
+            const cloudData = await fetchDataFromGoogleSheets();
+            
+            if (cloudData) {
+                // استخدام بيانات السحابة
+                appData.deposits = cloudData.deposits || [];
+                appData.expenses = cloudData.expenses || [];
+                appData.withdrawals = cloudData.withdrawals || [];
+                
+                // حفظ نسخة محلية كـ cache
+                saveDataLocally();
+                console.log('✅ تم تحميل البيانات من Google Sheets');
+            } else {
+                // استخدام البيانات المحلية (LocalStorage) كخطة احتياطية
+                const savedData = localStorage.getItem('flosnaData');
+                if (savedData) {
+                    appData = JSON.parse(savedData);
+                    if (!appData.withdrawals) {
+                        appData.withdrawals = [];
+                    }
+                    console.log('⚠️ تم تحميل البيانات من LocalStorage (وضع عدم الاتصال)');
                 }
+            }
+            
+            // تنظيف الصور القديمة
+            cleanOldImages();
+        }
+
+        // حفظ البيانات محلياً (كنسخة احتياطية)
+        function saveDataLocally() {
+            try {
+                localStorage.setItem('flosnaData', JSON.stringify(appData));
+            } catch (error) {
+                console.warn('⚠️ تحذير: فشل حفظ البيانات محلياً:', error);
             }
         }
 
+        // تنظيف الصور من الإيداعات المقبولة/المرفوضة
+        function cleanOldImages() {
+            let cleaned = false;
+            appData.deposits.forEach(deposit => {
+                if ((deposit.status === 'approved' || deposit.status === 'rejected') && deposit.proof) {
+                    delete deposit.proof;
+                    cleaned = true;
+                }
+            });
+            
+            if (cleaned) {
+                saveDataLocally();
+                console.log('✅ تم تنظيف الصور القديمة');
+            }
+        }
+
+        // دالة الحفظ القديمة (للتوافق مع الكود القديم)
         function saveData() {
-            localStorage.setItem('flosnaData', JSON.stringify(appData));
+            saveDataLocally();
         }
 
         function setupEventListeners() {
@@ -687,45 +827,104 @@
             AOS.refresh();
         }
 
-        function addDeposit() {
+        // دالة لضغط الصور
+        function compressImage(file, maxWidth = 800, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        const compressedData = canvas.toDataURL('image/jpeg', quality);
+                        resolve(compressedData);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function addDeposit() {
             const name = document.getElementById('depositor-name').value;
             const phone = document.getElementById('depositor-phone').value;
             const amount = parseInt(document.getElementById('deposit-amount').value);
             const proofInput = document.getElementById('deposit-proof');
             
-            if (!name || !phone || !amount || !proofInput.files[0]) { showToast('يرجى ملء جميع الحقول', 'warning'); return; }
+            if (!name || !phone || !amount || !proofInput.files[0]) { 
+                showToast('يرجى ملء جميع الحقول', 'warning'); 
+                return; 
+            }
             
             // Validate Egyptian phone number (11 digits)
-            if (!/^\d{11}$/.test(phone)) { showToast('رقم الهاتف يجب أن يكون 11 رقم مصري', 'warning'); return; }
+            if (!/^\d{11}$/.test(phone)) { 
+                showToast('رقم الهاتف يجب أن يكون 11 رقم مصري', 'warning'); 
+                return; 
+            }
 
             const proofFile = proofInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const newDeposit = {
-                    id: Date.now(), name: name, phone: phone, amount: amount,
-                    date: new Date().toLocaleDateString('ar-EG'),
-                    status: 'pending', proof: event.target.result
-                };
-                appData.deposits.push(newDeposit);
-                saveData();
+            
+            try {
+                // ضغط الصورة قبل الحفظ
+                const compressedImage = await compressImage(proofFile, 600, 0.6);
                 
-                // إرسال إلى Google Sheets - ورقة الإيداعات المعلقة
-                sendToGoogleSheets('الإيداعات_المعلقة', {
+                const newDeposit = {
+                    id: Date.now(), 
+                    name: name, 
+                    phone: phone, 
+                    amount: amount,
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    status: 'pending', 
+                    proof: compressedImage
+                };
+                
+                // إرسال إلى Google Sheets
+                const result = await sendToGoogleSheets('addDeposit', {
+                    ID: newDeposit.id,
                     التاريخ: newDeposit.date,
                     الاسم: name,
                     الهاتف: phone,
                     المبلغ: amount,
-                    الحالة: 'معلق'
+                    الصورة: compressedImage
                 });
                 
-                updateUI();
-                document.getElementById('deposit-form').reset();
-                document.getElementById('proof-preview').style.display = 'none';
-                addActivity('deposit', `تم إضافة إيداع جديد من ${name}`);
-                showToast('تم إضافة الإيداع بنجاح، بانتظار الموافقة', 'success');
-                showPage('home');
-            };
-            reader.readAsDataURL(proofFile);
+                if (result && result.status === 'success') {
+                    // إضافة للبيانات المحلية
+                    appData.deposits.push(newDeposit);
+                    saveDataLocally();
+                    
+                    updateUI();
+                    document.getElementById('deposit-form').reset();
+                    document.getElementById('proof-preview').style.display = 'none';
+                    
+                    // استدعاء addActivity بشكل آمن
+                    if (typeof addActivity === 'function') {
+                        addActivity('deposit', `تم إضافة إيداع جديد من ${name}`);
+                    }
+                    
+                    showToast('تم إضافة الإيداع بنجاح، بانتظار الموافقة', 'success');
+                    showPage('home');
+                } else {
+                    showToast('فشل إضافة الإيداع، حاول مرة أخرى', 'error');
+                }
+            } catch (error) {
+                console.error('خطأ في إضافة الإيداع:', error);
+                showToast('حدث خطأ في معالجة الإيداع', 'error');
+            }
         }
 
         function addWithdrawal() {
@@ -848,7 +1047,8 @@
         function updateHomePage() {
             const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, deposit) => sum + deposit.amount, 0);
             const totalExpenses = appData.expenses.reduce((sum, expense) => sum + expense.amount, 0);
-            const currentBalance = totalDeposits - totalExpenses;
+            const totalWithdrawals = appData.withdrawals.filter(w => w.status === 'approved').reduce((sum, withdrawal) => sum + withdrawal.amount, 0);
+            const currentBalance = totalDeposits - totalExpenses - totalWithdrawals;
             
             document.getElementById('total-balance').innerHTML = `<i class="fas fa-pound-sign"></i> ${currentBalance}`;
             document.getElementById('total-deposits').textContent = appData.deposits.filter(d => d.status === 'approved').length;
@@ -946,7 +1146,8 @@
             
             const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, deposit) => sum + deposit.amount, 0);
             const totalExpenses = appData.expenses.reduce((sum, expense) => sum + expense.amount, 0);
-            const currentBalance = totalDeposits - totalExpenses;
+            const totalWithdrawals = appData.withdrawals.filter(w => w.status === 'approved').reduce((sum, withdrawal) => sum + withdrawal.amount, 0);
+            const currentBalance = totalDeposits - totalExpenses - totalWithdrawals;
             
             document.getElementById('admin-total-deposits').textContent = totalDeposits;
             document.getElementById('admin-total-expenses').textContent = totalExpenses;
@@ -980,43 +1181,40 @@
             }
         }
 
-        function updateDepositStatus(id, status) {
+        async function updateDepositStatus(id, status) {
             const deposit = appData.deposits.find(d => d.id === id);
             if (deposit) { 
                 const oldStatus = deposit.status;
-                deposit.status = status; 
-                saveData(); 
+                deposit.status = status;
                 
-                // إرسال إلى Google Sheets والإشعار عند الموافقة فقط
-                if (status === 'approved' && oldStatus === 'pending') {
-                    // إرسال إلى ورقة الإيداعات المقبولة
-                    sendToGoogleSheets('الإيداعات_المقبولة', {
-                        التاريخ: deposit.date,
-                        الاسم: deposit.name,
-                        الهاتف: deposit.phone,
-                        المبلغ: deposit.amount,
-                        'تاريخ الموافقة': new Date().toLocaleDateString('ar-EG')
-                    });
+                // حذف الصورة بعد القبول/الرفض لتوفير المساحة
+                if (status === 'approved' || status === 'rejected') {
+                    delete deposit.proof;
+                }
+                
+                // إرسال التحديث إلى Google Sheets
+                const result = await sendToGoogleSheets('updateDepositStatus', {
+                    ID: id,
+                    الحالة: status
+                });
+                
+                if (result && result.status === 'success') {
+                    saveDataLocally();
                     
-                    // إرسال إشعار Telegram
-                    const message = `🎉 إيداع مؤكد ✅
+                    // إرسال إشعار Telegram عند الموافقة فقط
+                    if (status === 'approved' && oldStatus === 'pending') {
+                        const message = `🎉 إيداع مؤكد ✅
 
 👤 الاسم: ${deposit.name}
 📱 الهاتف: ${deposit.phone}
 💰 المبلغ: ${deposit.amount} جنيه
 📅 التاريخ: ${deposit.date}`;
-                    sendTelegramNotification(message);
-                }
-                
-                // إرسال إلى ورقة الإيداعات المرفوضة
-                if (status === 'rejected' && oldStatus === 'pending') {
-                    sendToGoogleSheets('الإيداعات_المرفوضة', {
-                        التاريخ: deposit.date,
-                        الاسم: deposit.name,
-                        الهاتف: deposit.phone,
-                        المبلغ: deposit.amount,
-                        'تاريخ الرفض': new Date().toLocaleDateString('ar-EG')
-                    });
+                        sendTelegramNotification(message);
+                    }
+                    
+                    showToast('تم تحديث حالة الإيداع بنجاح', 'success');
+                } else {
+                    showToast('فشل تحديث الحالة', 'error');
                 }
                 
                 updateUI(); 
@@ -1126,6 +1324,179 @@
                     showToast(`تم حذف المصروف "${expense.description}" بنجاح`, 'success');
                 }
             }
+        }
+
+        // ========== حذف جميع البيانات ==========
+        function deleteAllData() {
+            const confirmation1 = confirm('⚠️ تحذير: هل أنت متأكد من حذف جميع البيانات؟\n\nسيتم حذف:\n- جميع الإيداعات\n- جميع المصروفات\n- جميع السحوبات\n\nهذا الإجراء لا يمكن التراجع عنه!');
+            
+            if (!confirmation1) {
+                return;
+            }
+            
+            const confirmation2 = prompt('للتأكيد النهائي، اكتب "حذف" بالضبط:');
+            
+            if (confirmation2 === 'حذف') {
+                // حذف جميع البيانات
+                appData.deposits = [];
+                appData.expenses = [];
+                appData.withdrawals = [];
+                
+                saveData();
+                updateUI();
+                updateAdminDashboard();
+                
+                showToast('تم حذف جميع البيانات بنجاح', 'success');
+                
+                // إعادة تحميل الصفحة بعد ثانيتين
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showToast('تم إلغاء عملية الحذف', 'info');
+            }
+        }
+
+        // ========== طباعة التقارير ==========
+        function getStatusText(status) {
+            const statusTexts = {
+                'approved': 'مقبول',
+                'pending': 'معلق',
+                'rejected': 'مرفوض'
+            };
+            return statusTexts[status] || status;
+        }
+
+        function printBalanceReport() {
+            const totalDeposits = appData.deposits.filter(d => d.status === 'approved').reduce((sum, d) => sum + d.amount, 0);
+            const totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+            const totalWithdrawals = appData.withdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0);
+            const currentBalance = totalDeposits - totalExpenses - totalWithdrawals;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<!DOCTYPE html>');
+            printWindow.document.write('<html dir="rtl" lang="ar">');
+            printWindow.document.write('<head>');
+            printWindow.document.write('<meta charset="UTF-8">');
+            printWindow.document.write('<title>تقرير الرصيد الكامل - فلوسنا</title>');
+            printWindow.document.write('<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">');
+            printWindow.document.write('<style>');
+            printWindow.document.write('* { font-family: Cairo, sans-serif; margin: 0; padding: 0; box-sizing: border-box; }');
+            printWindow.document.write('body { padding: 40px; background: #f8fafc; }');
+            printWindow.document.write('.container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }');
+            printWindow.document.write('.header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; }');
+            printWindow.document.write('.header h1 { color: #1e40af; font-size: 2rem; margin-bottom: 10px; }');
+            printWindow.document.write('.section { margin: 30px 0; }');
+            printWindow.document.write('.section-title { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 1.2rem; }');
+            printWindow.document.write('.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }');
+            printWindow.document.write('.stat-box { background: #f1f5f9; padding: 20px; border-radius: 8px; text-align: center; border-right: 4px solid; }');
+            printWindow.document.write('.stat-box.balance { border-right-color: #3b82f6; }');
+            printWindow.document.write('.stat-box.deposits { border-right-color: #10b981; }');
+            printWindow.document.write('.stat-box.expenses { border-right-color: #ef4444; }');
+            printWindow.document.write('.stat-box.withdrawals { border-right-color: #f59e0b; }');
+            printWindow.document.write('.stat-label { color: #64748b; font-size: 0.9rem; margin-bottom: 8px; }');
+            printWindow.document.write('.stat-value { color: #1e293b; font-size: 1.8rem; font-weight: 700; }');
+            printWindow.document.write('.footer { margin-top: 40px; text-align: center; color: #94a3b8; font-size: 0.9rem; border-top: 2px solid #e2e8f0; padding-top: 20px; }');
+            printWindow.document.write('@media print { body { padding: 0; background: white; } .container { box-shadow: none; } }');
+            printWindow.document.write('</style></head><body>');
+            printWindow.document.write('<div class="container">');
+            printWindow.document.write('<div class="header">');
+            printWindow.document.write('<h1>📊 تقرير الرصيد الكامل</h1>');
+            printWindow.document.write('<p>فلوسنا - المحفظة الجماعية</p>');
+            printWindow.document.write('<p style="margin-top: 10px; color: #3b82f6; font-weight: 600;">التاريخ: ' + new Date().toLocaleDateString('ar-EG') + '</p>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('<div class="section">');
+            printWindow.document.write('<div class="section-title">💰 ملخص الرصيد</div>');
+            printWindow.document.write('<div class="stat-grid">');
+            printWindow.document.write('<div class="stat-box balance"><div class="stat-label">الرصيد الحالي</div><div class="stat-value">' + currentBalance.toLocaleString('ar-EG') + ' جنيه</div></div>');
+            printWindow.document.write('<div class="stat-box deposits"><div class="stat-label">إجمالي الإيداعات المقبولة</div><div class="stat-value">' + totalDeposits.toLocaleString('ar-EG') + ' جنيه</div></div>');
+            printWindow.document.write('<div class="stat-box expenses"><div class="stat-label">إجمالي المصروفات</div><div class="stat-value">' + totalExpenses.toLocaleString('ar-EG') + ' جنيه</div></div>');
+            printWindow.document.write('<div class="stat-box withdrawals"><div class="stat-label">إجمالي السحوبات المقبولة</div><div class="stat-value">' + totalWithdrawals.toLocaleString('ar-EG') + ' جنيه</div></div>');
+            printWindow.document.write('</div></div>');
+            printWindow.document.write('<div class="section"><div class="section-title">📈 تفاصيل إضافية</div>');
+            printWindow.document.write('<table style="width: 100%; border-collapse: collapse;">');
+            printWindow.document.write('<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px; color: #64748b;">عدد الإيداعات المقبولة</td><td style="padding: 12px; text-align: left; font-weight: 600;">' + appData.deposits.filter(d => d.status === 'approved').length + '</td></tr>');
+            printWindow.document.write('<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px; color: #64748b;">عدد المصروفات</td><td style="padding: 12px; text-align: left; font-weight: 600;">' + appData.expenses.length + '</td></tr>');
+            printWindow.document.write('<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px; color: #64748b;">عدد السحوبات المقبولة</td><td style="padding: 12px; text-align: left; font-weight: 600;">' + appData.withdrawals.filter(w => w.status === 'approved').length + '</td></tr>');
+            printWindow.document.write('<tr><td style="padding: 12px; color: #64748b;">إجمالي العمليات</td><td style="padding: 12px; text-align: left; font-weight: 600;">' + (appData.deposits.length + appData.expenses.length + appData.withdrawals.length) + '</td></tr>');
+            printWindow.document.write('</table></div>');
+            printWindow.document.write('<div class="footer"><p>تم إنشاء هذا التقرير بواسطة نظام فلوسنا</p><p>© ' + new Date().getFullYear() + ' جميع الحقوق محفوظة</p></div>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); }<\/script>');
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+        }
+
+        function printDepositsReport() {
+            const deposits = [...appData.deposits].sort((a, b) => b.id - a.id);
+            const approved = deposits.filter(d => d.status === 'approved');
+            const pending = deposits.filter(d => d.status === 'pending');
+            const rejected = deposits.filter(d => d.status === 'rejected');
+            const totalApproved = approved.reduce((sum, d) => sum + d.amount, 0);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">');
+            printWindow.document.write('<title>تقرير الإيداعات - فلوسنا</title>');
+            printWindow.document.write('<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">');
+            printWindow.document.write('<style>* { font-family: Cairo, sans-serif; margin: 0; padding: 0; } body { padding: 40px; background: #f8fafc; } .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; } .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #10b981; padding-bottom: 20px; } .header h1 { color: #059669; font-size: 2rem; } .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; } .summary-box { background: #f0fdf4; padding: 15px; border-radius: 8px; text-align: center; border-right: 4px solid #10b981; } .summary-box .label { color: #059669; font-size: 0.85rem; } .summary-box .value { color: #064e3b; font-size: 1.3rem; font-weight: 700; } table { width: 100%; border-collapse: collapse; } th { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; text-align: right; } td { padding: 10px; border-bottom: 1px solid #e2e8f0; } .status { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; } .status.approved { background: #d1fae5; color: #065f46; } .status.pending { background: #fef3c7; color: #92400e; } .status.rejected { background: #fee2e2; color: #991b1b; } @media print { body { padding: 0; background: white; } }</style></head><body>');
+            printWindow.document.write('<div class="container"><div class="header"><h1>📥 تقرير الإيداعات</h1>');
+            printWindow.document.write('<p style="color: #059669; font-weight: 600;">التاريخ: ' + new Date().toLocaleDateString('ar-EG') + '</p></div>');
+            printWindow.document.write('<div class="summary">');
+            printWindow.document.write('<div class="summary-box"><div class="label">المقبولة</div><div class="value">' + approved.length + '</div></div>');
+            printWindow.document.write('<div class="summary-box"><div class="label">المعلقة</div><div class="value">' + pending.length + '</div></div>');
+            printWindow.document.write('<div class="summary-box"><div class="label">المرفوضة</div><div class="value">' + rejected.length + '</div></div>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('<div style="background: #dcfce7; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px;">');
+            printWindow.document.write('<div style="color: #065f46;">إجمالي المبالغ المقبولة</div>');
+            printWindow.document.write('<div style="color: #059669; font-size: 1.8rem; font-weight: 700; margin-top: 5px;">' + totalApproved.toLocaleString('ar-EG') + ' جنيه</div></div>');
+            printWindow.document.write('<table><thead><tr><th>الاسم</th><th>الهاتف</th><th>المبلغ</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>');
+            deposits.forEach(d => {
+                printWindow.document.write('<tr><td>' + d.name + '</td><td>' + (d.phone || '-') + '</td><td style="font-weight: 600;">' + d.amount.toLocaleString('ar-EG') + ' جنيه</td><td>' + d.date + '</td><td><span class="status ' + d.status + '">' + getStatusText(d.status) + '</span></td></tr>');
+            });
+            printWindow.document.write('</tbody></table></div>');
+            printWindow.document.write('<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); }<\/script></body></html>');
+            printWindow.document.close();
+        }
+
+        function printExpensesWithdrawalsReport() {
+            const expenses = [...appData.expenses].sort((a, b) => b.id - a.id);
+            const withdrawals = [...appData.withdrawals].sort((a, b) => b.id - a.id);
+            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+            const totalWithdrawals = withdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">');
+            printWindow.document.write('<title>تقرير المصروفات والسحوبات - فلوسنا</title>');
+            printWindow.document.write('<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">');
+            printWindow.document.write('<style>* { font-family: Cairo, sans-serif; margin: 0; padding: 0; } body { padding: 40px; background: #f8fafc; } .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; } .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #ef4444; padding-bottom: 20px; } .header h1 { color: #dc2626; font-size: 2rem; } .summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; } .summary-box { padding: 15px; border-radius: 8px; text-align: center; } .summary-box.expenses { background: #fee2e2; border-right: 4px solid #ef4444; } .summary-box.withdrawals { background: #fef3c7; border-right: 4px solid #f59e0b; } .summary-box .value { font-size: 1.5rem; font-weight: 700; } .section { margin: 30px 0; } .section-title { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; } table { width: 100%; border-collapse: collapse; } th { background: #f1f5f9; padding: 10px; text-align: right; color: #475569; } td { padding: 10px; border-bottom: 1px solid #e2e8f0; } .status { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; } .status.approved { background: #d1fae5; color: #065f46; } .status.pending { background: #fef3c7; color: #92400e; } .status.rejected { background: #fee2e2; color: #991b1b; } @media print { body { padding: 0; background: white; } }</style></head><body>');
+            printWindow.document.write('<div class="container"><div class="header"><h1>📤 تقرير المصروفات والسحوبات</h1>');
+            printWindow.document.write('<p style="color: #dc2626; font-weight: 600;">التاريخ: ' + new Date().toLocaleDateString('ar-EG') + '</p></div>');
+            printWindow.document.write('<div class="summary">');
+            printWindow.document.write('<div class="summary-box expenses"><div style="color: #991b1b;">إجمالي المصروفات</div><div class="value" style="color: #dc2626;">' + totalExpenses.toLocaleString('ar-EG') + ' جنيه</div></div>');
+            printWindow.document.write('<div class="summary-box withdrawals"><div style="color: #92400e;">إجمالي السحوبات المقبولة</div><div class="value" style="color: #d97706;">' + totalWithdrawals.toLocaleString('ar-EG') + ' جنيه</div></div>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('<div class="section"><div class="section-title">🛒 المصروفات (' + expenses.length + ')</div>');
+            printWindow.document.write('<table><thead><tr><th>الوصف</th><th>الفئة</th><th>المبلغ</th><th>التاريخ</th></tr></thead><tbody>');
+            if (expenses.length > 0) {
+                expenses.forEach(e => {
+                    printWindow.document.write('<tr><td>' + e.description + '</td><td>' + (e.category || 'غير محدد') + '</td><td style="font-weight: 600;">' + e.amount.toLocaleString('ar-EG') + ' جنيه</td><td>' + e.date + '</td></tr>');
+                });
+            } else {
+                printWindow.document.write('<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد مصروفات</td></tr>');
+            }
+            printWindow.document.write('</tbody></table></div>');
+            printWindow.document.write('<div class="section"><div class="section-title">💸 السحوبات (' + withdrawals.length + ')</div>');
+            printWindow.document.write('<table><thead><tr><th>الاسم</th><th>الهاتف</th><th>المبلغ</th><th>السبب</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>');
+            if (withdrawals.length > 0) {
+                withdrawals.forEach(w => {
+                    printWindow.document.write('<tr><td>' + w.name + '</td><td>' + w.phone + '</td><td style="font-weight: 600;">' + w.amount.toLocaleString('ar-EG') + ' جنيه</td><td>' + w.reason + '</td><td>' + w.date + '</td><td><span class="status ' + w.status + '">' + getStatusText(w.status) + '</span></td></tr>');
+                });
+            } else {
+                printWindow.document.write('<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد سحوبات</td></tr>');
+            }
+            printWindow.document.write('</tbody></table></div></div>');
+            printWindow.document.write('<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); }<\/script></body></html>');
+            printWindow.document.close();
         }
 
         // ========== Admin Tabs ==========
