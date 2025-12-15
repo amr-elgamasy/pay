@@ -1239,46 +1239,36 @@
             }
         }
 
-        function updateWithdrawalStatus(id, status) {
+        async function updateWithdrawalStatus(id, status) {
             const withdrawal = appData.withdrawals.find(w => w.id === id);
             if (withdrawal) { 
                 const oldStatus = withdrawal.status;
-                withdrawal.status = status; 
-                saveData(); 
+                withdrawal.status = status;
                 
-                // إرسال إلى Google Sheets والإشعار عند الموافقة فقط
-                if (status === 'approved' && oldStatus === 'pending') {
-                    // إرسال إلى ورقة السحوبات المقبولة
-                    sendToGoogleSheets('السحوبات_المقبولة', {
-                        التاريخ: withdrawal.date,
-                        الاسم: withdrawal.name,
-                        الهاتف: withdrawal.phone,
-                        المبلغ: withdrawal.amount,
-                        السبب: withdrawal.reason,
-                        'تاريخ الموافقة': new Date().toLocaleDateString('ar-EG')
-                    });
+                // إرسال التحديث إلى Google Sheets
+                const result = await sendToGoogleSheets('updateWithdrawalStatus', {
+                    ID: id,
+                    الحالة: status
+                });
+                
+                if (result && result.status === 'success') {
+                    saveData();
                     
-                    // إرسال إشعار Telegram
-                    const message = `💸 سحب مؤكد ✅
+                    // إرسال إشعار Telegram عند الموافقة فقط
+                    if (status === 'approved' && oldStatus === 'pending') {
+                        const message = `💸 سحب مؤكد ✅
 
 👤 الاسم: ${withdrawal.name}
 📱 الهاتف: ${withdrawal.phone}
 💰 المبلغ: ${withdrawal.amount} جنيه
 📝 السبب: ${withdrawal.reason}
 📅 التاريخ: ${withdrawal.date}`;
-                    sendTelegramNotification(message);
-                }
-                
-                // إرسال إلى ورقة السحوبات المرفوضة
-                if (status === 'rejected' && oldStatus === 'pending') {
-                    sendToGoogleSheets('السحوبات_المرفوضة', {
-                        التاريخ: withdrawal.date,
-                        الاسم: withdrawal.name,
-                        الهاتف: withdrawal.phone,
-                        المبلغ: withdrawal.amount,
-                        السبب: withdrawal.reason,
-                        'تاريخ الرفض': new Date().toLocaleDateString('ar-EG')
-                    });
+                        sendTelegramNotification(message);
+                    }
+                    
+                    showToast('تم تحديث حالة السحب بنجاح', 'success');
+                } else {
+                    showToast('فشل تحديث الحالة', 'error');
                 }
                 
                 updateUI(); 
