@@ -328,15 +328,61 @@
                 </div>
 
                 <div id="admin-dashboard" style="display: none;">
-                    <div style="text-align: left; margin-bottom: 1.5rem;">
-                        <button class="btn btn-danger" onclick="adminLogout();" style="background-color: var(--danger-color); border: none; padding: 0.6rem 1.2rem; font-size: 0.9rem;">
-                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-                        </button>
-                    </div>
+                    <!-- Admin Dashboard with Sidebar -->
+                    <div class="admin-layout">
+                        <!-- Sidebar -->
+                        <aside class="admin-sidebar">
+                            <div class="sidebar-header">
+                                <div class="sidebar-logo">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>لوحة التحكم</span>
+                                </div>
+                            </div>
+                            
+                            <nav class="sidebar-nav">
+                                <a href="#admin-stats" class="sidebar-link active" onclick="showAdminSection('admin-stats')">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>الإحصائيات</span>
+                                </a>
+                                <a href="#admin-expenses-section" class="sidebar-link" onclick="showAdminSection('admin-expenses-section')">
+                                    <i class="fas fa-cash-register"></i>
+                                    <span>المصروفات</span>
+                                </a>
+                                <a href="#admin-management" class="sidebar-link" onclick="showAdminSection('admin-management')">
+                                    <i class="fas fa-tasks"></i>
+                                    <span>إدارة العمليات</span>
+                                </a>
+                                <a href="#admin-reports" class="sidebar-link" onclick="showAdminSection('admin-reports')">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>التقارير</span>
+                                </a>
+                                <a href="#admin-payment" class="sidebar-link" onclick="showAdminSection('admin-payment')">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>طرق الدفع</span>
+                                </a>
+                                <a href="#admin-danger" class="sidebar-link danger" onclick="showAdminSection('admin-danger')">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>منطقة الخطر</span>
+                                </a>
+                            </nav>
+                            
+                            <div class="sidebar-footer">
+                                <button class="sidebar-logout" onclick="adminLogout();">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>تسجيل الخروج</span>
+                                </button>
+                            </div>
+                        </aside>
 
-                    <div class="card admin-section" data-aos="fade-up">
-                        <h2 class="card-header"><i class="fas fa-chart-bar"></i> الإحصائيات</h2>
-                        <div class="stats">
+                        <!-- Main Content -->
+                        <div class="admin-content">
+                            <!-- الإحصائيات -->
+                            <div id="admin-stats" class="admin-section-content active">
+                                <div class="section-header">
+                                    <h2><i class="fas fa-chart-line"></i> الإحصائيات العامة</h2>
+                                </div>
+                                <div class="card admin-section" data-aos="fade-up">
+                                <div class="stats">
                             <div class="stat-item" data-aos="zoom-in" data-aos-delay="300">
                                 <i class="fas fa-arrow-down" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--success-color);"></i>
                                 <div class="stat-value" id="admin-total-deposits">0</div>
@@ -354,9 +400,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
-                        <h2 class="card-header"><i class="fas fa-cash-register"></i> إضافة مصروفات</h2>
+                            </div>
+
+                            <!-- قسم المصروفات -->
+                            <div id="admin-expenses-section" class="admin-section-content">
+                                <div class="section-header">
+                                    <h2><i class="fas fa-cash-register"></i> إدارة المصروفات</h2>
+                                </div>
+                                <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
                         <form id="expense-form">
                             <div class="form-group">
                                 <label for="expense-description"><i class="fas fa-pen"></i> وصف المصروف</label>
@@ -373,8 +424,14 @@
                             <button type="submit" class="btn-danger"><i class="fas fa-plus"></i> إضافة المصروف</button>
                         </form>
                     </div>
-                    
-                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="150">
+                            </div>
+
+                            <!-- قسم إدارة العمليات -->
+                            <div id="admin-management" class="admin-section-content">
+                                <div class="section-header">
+                                    <h2><i class="fas fa-tasks"></i> إدارة العمليات والمعاملات</h2>
+                                </div>
+                                <div class="card admin-section" data-aos="fade-up" data-aos-delay="150">
                         <div class="admin-tabs">
                             <div class="tab-headers">
                                 <button class="tab-header active" onclick="switchAdminTab('deposits')">
@@ -494,9 +551,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="75">
-                        <h2 class="card-header"><i class="fas fa-print"></i> طباعة التقارير</h2>
+                            </div>
+
+                            <!-- قسم التقارير -->
+                            <div id="admin-reports" class="admin-section-content">
+                                <div class="section-header">
+                                    <h2><i class="fas fa-file-alt"></i> التقارير والإحصائيات</h2>
+                                </div>
+                                <div class="card admin-section" data-aos="fade-up" data-aos-delay="75">
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem;">
                             <button class="btn" onclick="printBalanceReport()" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
                                 <i class="fas fa-file-invoice-dollar"></i> تقرير الرصيد الكامل
@@ -509,8 +571,14 @@
                             </button>
                         </div>
                     </div>
-                    
-                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="50" style="border: 2px solid var(--danger-color);">
+                            </div>
+
+                            <!-- قسم منطقة الخطر -->
+                            <div id="admin-danger" class="admin-section-content">
+                                <div class="section-header">
+                                    <h2><i class="fas fa-exclamation-triangle"></i> منطقة الخطر</h2>
+                                </div>
+                                <div class="card admin-section" data-aos="fade-up" data-aos-delay="50" style="border: 2px solid var(--danger-color);">
                         <h2 class="card-header" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); color: var(--danger-color);">
                             <i class="fas fa-exclamation-triangle"></i> منطقة الخطر
                         </h2>
@@ -523,9 +591,14 @@
                             </button>
                         </div>
                     </div>
+                            </div>
 
-                    <!-- إعدادات طرق الدفع -->
-                    <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                            <!-- قسم طرق الدفع -->
+                            <div id="admin-payment" class="admin-section-content">
+                                <div class="section-header">
+                                    <h2><i class="fas fa-credit-card"></i> إعدادات طرق الدفع</h2>
+                                </div>
+                                <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
                         <h2 class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                             <i class="fas fa-credit-card"></i> إعدادات طرق الدفع
                         </h2>
@@ -617,6 +690,9 @@
                                     <i class="fas fa-save"></i> حفظ التغييرات
                                 </button>
                             </form>
+                        </div>
+                    </div>
+                            </div>
                         </div>
                     </div>
                    
@@ -1275,9 +1351,41 @@
             // تحميل إعدادات الدفع عند فتح صفحة الإدارة
             if (pageId === 'admin') {
                 setTimeout(() => loadPaymentSettings(), 100);
+                // عرض قسم الإحصائيات كافتراضي
+                showAdminSection('admin-stats');
             }
             
             AOS.refresh();
+        }
+
+        // دالة للتنقل بين أقسام لوحة التحكم
+        function showAdminSection(sectionId) {
+            // إخفاء كل الأقسام
+            document.querySelectorAll('.admin-section-content').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // إلغاء تفعيل كل روابط القائمة الجانبية
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // إظهار القسم المحدد
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // تفعيل الرابط المناسب في القائمة الجانبية
+            const targetLink = document.querySelector(`.sidebar-link[onclick*="${sectionId}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+            
+            AOS.refresh();
+            
+            // منع السلوك الافتراضي للروابط
+            return false;
         }
 
         // دالة لضغط الصور
