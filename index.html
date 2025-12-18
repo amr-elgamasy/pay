@@ -686,7 +686,7 @@
                                     </label>
                                 </div>
 
-                                <button type="button" onclick="savePaymentSettings()" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600; padding: 1rem;">
+                                <button type="button" onclick="savePaymentSettings(event)" class="btn" id="save-payment-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600; padding: 1rem;">
                                     <i class="fas fa-save"></i> حفظ التغييرات
                                 </button>
                             </form>
@@ -1041,7 +1041,7 @@
 
         // ========== إدارة طرق الدفع ==========
         
-        function savePaymentSettings() {
+        function savePaymentSettings(event) {
             try {
                 // التحقق من وجود العناصر
                 const elements = {
@@ -1092,7 +1092,21 @@
                 appData.paymentMethods = paymentMethods;
                 saveDataLocally();
                 
-                showToast('تم حفظ إعدادات طرق الدفع بنجاح', 'success');
+                // رسالة نجاح واضحة ومميزة
+                showToast('✓ تم حفظ إعدادات طرق الدفع بنجاح!', 'success');
+                
+                // تأثير بصري على الزر
+                const saveBtn = event?.target;
+                if (saveBtn) {
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = '<i class="fas fa-check-circle"></i> تم الحفظ بنجاح!';
+                    saveBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    setTimeout(() => {
+                        saveBtn.innerHTML = originalText;
+                        saveBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    }, 2000);
+                }
+                
                 updatePaymentMethodsDisplay();
             } catch (error) {
                 console.error('❌ خطأ في حفظ الإعدادات:', error);
