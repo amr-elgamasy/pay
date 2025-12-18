@@ -29,14 +29,18 @@
     <div id="toast-container"></div>
     
     <!-- Loading Spinner -->
-    <div id="loading-spinner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center;">
-        <div style="text-align: center; color: white;">
-            <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
-                <span class="visually-hidden">جاري التحميل...</span>
-            </div>
-            <p style="margin-top: 15px; font-size: 18px;">جاري التحميل من السحابة...</p>
+    <div id="loading-spinner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem 3rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);">
+            <div style="width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+            <p style="margin-top: 15px; font-size: 16px; color: white; font-weight: 600;">جاري المعالجة...</p>
         </div>
     </div>
+    
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
     
     <header>
         <div class="header-content">
@@ -657,9 +661,7 @@
 
         // ========== نظام Toast Notifications ==========
         function showToast(message, type = 'success') {
-            console.log('🔔 showToast called:', message, type);
             const container = document.getElementById('toast-container');
-            console.log('📦 Container element:', container);
             if (!container) {
                 console.error('❌ Toast container not found!');
                 return;
@@ -687,7 +689,6 @@
             `;
             
             container.appendChild(toast);
-            console.log('✅ Toast added to container');
             
             // Trigger animation
             setTimeout(() => {
@@ -921,9 +922,6 @@
                 return;
             }
 
-            console.log('🔄 جاري إرسال الإشعار إلى Telegram...');
-            console.log('📤 الرسالة:', message);
-
             try {
                 const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
                 const payload = {
@@ -932,9 +930,6 @@
                     parse_mode: 'HTML'
                 };
                 
-                console.log('🌐 URL:', url.substring(0, 50) + '...');
-                console.log('📦 Payload:', JSON.stringify(payload).substring(0, 100) + '...');
-                
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -942,14 +937,11 @@
                 });
                 
                 const result = await response.json();
-                console.log('📥 الرد من Telegram API:', result);
                 
                 if (result.ok) {
-                    console.log('✅ تم إرسال الإشعار إلى Telegram بنجاح');
                     return true;
                 } else {
-                    console.error('❌ خطأ من Telegram API:', result);
-                    console.error('وصف الخطأ:', result.description);
+                    console.error('❌ خطأ من Telegram API:', result.description);
                     return false;
                 }
             } catch (error) {
@@ -970,8 +962,6 @@
         // ========== إدارة طرق الدفع ==========
         
         function savePaymentSettings() {
-            console.log('💾 بدء حفظ إعدادات الدفع...');
-            
             try {
                 // التحقق من وجود العناصر
                 const elements = {
@@ -1019,15 +1009,11 @@
                     }
                 };
                 
-                console.log('📦 البيانات المحفوظة:', paymentMethods);
-                
                 appData.paymentMethods = paymentMethods;
                 saveDataLocally();
                 
                 showToast('تم حفظ إعدادات طرق الدفع بنجاح', 'success');
                 updatePaymentMethodsDisplay();
-                
-                console.log('✅ تم الحفظ بنجاح');
             } catch (error) {
                 console.error('❌ خطأ في حفظ الإعدادات:', error);
                 showToast('حدث خطأ أثناء الحفظ: ' + error.message, 'error');
@@ -1182,11 +1168,6 @@
                 
                 // حفظ نسخة محلية كـ cache
                 saveDataLocally();
-                console.log('✅ تم تحميل البيانات من Google Sheets:', {
-                    deposits: appData.deposits.length,
-                    expenses: appData.expenses.length,
-                    withdrawals: appData.withdrawals.length
-                });
             } else {
                 // استخدام البيانات المحلية (LocalStorage) كخطة احتياطية
                 const savedData = localStorage.getItem('flosnaData');
@@ -1195,7 +1176,6 @@
                     if (!appData.withdrawals) {
                         appData.withdrawals = [];
                     }
-                    console.log('⚠️ تم تحميل البيانات من LocalStorage (وضع عدم الاتصال)');
                 }
             }
             
