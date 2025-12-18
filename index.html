@@ -2083,11 +2083,48 @@
             if (confirm('هل أنت متأكد من حذف هذا الإيداع؟ لا يمكن التراجع عن هذا الإجراء.')) {
                 const deposit = appData.deposits.find(d => d.id === id);
                 if (deposit) {
-                    appData.deposits = appData.deposits.filter(d => d.id !== id);
-                    saveData();
-                    updateUI();
-                    updateAdminDashboard();
-                    showToast(`تم حذف إيداع ${deposit.name} بنجاح`, 'success');
+                    // عرض مؤشر التحميل
+                    showLoadingSpinner();
+                    
+                    // حذف من Google Sheets أولاً
+                    if (GOOGLE_SHEETS_CONFIG.enabled) {
+                        fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'deleteDeposit',
+                                data: { ID: deposit.id }
+                            })
+                        })
+                        .then(() => {
+                            // حذف من البيانات المحلية
+                            appData.deposits = appData.deposits.filter(d => d.id !== id);
+                            saveDataLocally();
+                            updateUI();
+                            updateAdminDashboard();
+                            hideLoadingSpinner();
+                            showToast(`✓ تم حذف إيداع ${deposit.name} بنجاح من جميع الأنظمة`, 'success');
+                        })
+                        .catch(error => {
+                            console.error('خطأ في الحذف من Google Sheets:', error);
+                            // حذف محلي حتى لو فشل الحذف من Google Sheets
+                            appData.deposits = appData.deposits.filter(d => d.id !== id);
+                            saveDataLocally();
+                            updateUI();
+                            updateAdminDashboard();
+                            hideLoadingSpinner();
+                            showToast(`تم الحذف محلياً. قد تحتاج لحذفه يدوياً من Google Sheets`, 'warning');
+                        });
+                    } else {
+                        // حذف محلي فقط
+                        appData.deposits = appData.deposits.filter(d => d.id !== id);
+                        saveDataLocally();
+                        updateUI();
+                        updateAdminDashboard();
+                        hideLoadingSpinner();
+                        showToast(`تم حذف إيداع ${deposit.name} بنجاح`, 'success');
+                    }
                 }
             }
         }
@@ -2096,11 +2133,43 @@
             if (confirm('هل أنت متأكد من حذف هذا السحب؟ لا يمكن التراجع عن هذا الإجراء.')) {
                 const withdrawal = appData.withdrawals.find(w => w.id === id);
                 if (withdrawal) {
-                    appData.withdrawals = appData.withdrawals.filter(w => w.id !== id);
-                    saveData();
-                    updateUI();
-                    updateAdminDashboard();
-                    showToast(`تم حذف سحب ${withdrawal.name} بنجاح`, 'success');
+                    showLoadingSpinner();
+                    
+                    if (GOOGLE_SHEETS_CONFIG.enabled) {
+                        fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'deleteWithdrawal',
+                                data: { ID: withdrawal.id }
+                            })
+                        })
+                        .then(() => {
+                            appData.withdrawals = appData.withdrawals.filter(w => w.id !== id);
+                            saveDataLocally();
+                            updateUI();
+                            updateAdminDashboard();
+                            hideLoadingSpinner();
+                            showToast(`✓ تم حذف سحب ${withdrawal.name} بنجاح من جميع الأنظمة`, 'success');
+                        })
+                        .catch(error => {
+                            console.error('خطأ في الحذف من Google Sheets:', error);
+                            appData.withdrawals = appData.withdrawals.filter(w => w.id !== id);
+                            saveDataLocally();
+                            updateUI();
+                            updateAdminDashboard();
+                            hideLoadingSpinner();
+                            showToast(`تم الحذف محلياً. قد تحتاج لحذفه يدوياً من Google Sheets`, 'warning');
+                        });
+                    } else {
+                        appData.withdrawals = appData.withdrawals.filter(w => w.id !== id);
+                        saveDataLocally();
+                        updateUI();
+                        updateAdminDashboard();
+                        hideLoadingSpinner();
+                        showToast(`تم حذف سحب ${withdrawal.name} بنجاح`, 'success');
+                    }
                 }
             }
         }
@@ -2109,11 +2178,43 @@
             if (confirm('هل أنت متأكد من حذف هذا المصروف؟ لا يمكن التراجع عن هذا الإجراء.')) {
                 const expense = appData.expenses.find(e => e.id === id);
                 if (expense) {
-                    appData.expenses = appData.expenses.filter(e => e.id !== id);
-                    saveData();
-                    updateUI();
-                    updateAdminDashboard();
-                    showToast(`تم حذف المصروف "${expense.description}" بنجاح`, 'success');
+                    showLoadingSpinner();
+                    
+                    if (GOOGLE_SHEETS_CONFIG.enabled) {
+                        fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'deleteExpense',
+                                data: { ID: expense.id }
+                            })
+                        })
+                        .then(() => {
+                            appData.expenses = appData.expenses.filter(e => e.id !== id);
+                            saveDataLocally();
+                            updateUI();
+                            updateAdminDashboard();
+                            hideLoadingSpinner();
+                            showToast(`✓ تم حذف المصروف "${expense.description}" بنجاح من جميع الأنظمة`, 'success');
+                        })
+                        .catch(error => {
+                            console.error('خطأ في الحذف من Google Sheets:', error);
+                            appData.expenses = appData.expenses.filter(e => e.id !== id);
+                            saveDataLocally();
+                            updateUI();
+                            updateAdminDashboard();
+                            hideLoadingSpinner();
+                            showToast(`تم الحذف محلياً. قد تحتاج لحذفه يدوياً من Google Sheets`, 'warning');
+                        });
+                    } else {
+                        appData.expenses = appData.expenses.filter(e => e.id !== id);
+                        saveDataLocally();
+                        updateUI();
+                        updateAdminDashboard();
+                        hideLoadingSpinner();
+                        showToast(`تم حذف المصروف "${expense.description}" بنجاح`, 'success');
+                    }
                 }
             }
         }
