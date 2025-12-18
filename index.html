@@ -970,32 +970,68 @@
         // ========== إدارة طرق الدفع ==========
         
         function savePaymentSettings() {
-            const paymentMethods = {
-                instapay: {
-                    enabled: document.getElementById('instapay-enabled').checked,
-                    number: document.getElementById('instapay-number').value,
-                    name: document.getElementById('instapay-name').value
-                },
-                ewallet: {
-                    enabled: document.getElementById('ewallet-enabled').checked,
-                    type: document.getElementById('ewallet-type').value,
-                    number: document.getElementById('ewallet-number').value,
-                    name: document.getElementById('ewallet-name').value
-                },
-                bank: {
-                    enabled: document.getElementById('bank-enabled').checked,
-                    bankName: document.getElementById('bank-name').value,
-                    account: document.getElementById('bank-account').value,
-                    holder: document.getElementById('bank-holder').value,
-                    iban: document.getElementById('bank-iban').value
+            console.log('💾 بدء حفظ إعدادات الدفع...');
+            
+            try {
+                // التحقق من وجود العناصر
+                const elements = {
+                    instapayEnabled: document.getElementById('instapay-enabled'),
+                    instapayNumber: document.getElementById('instapay-number'),
+                    instapayName: document.getElementById('instapay-name'),
+                    ewalletEnabled: document.getElementById('ewallet-enabled'),
+                    ewalletType: document.getElementById('ewallet-type'),
+                    ewalletNumber: document.getElementById('ewallet-number'),
+                    ewalletName: document.getElementById('ewallet-name'),
+                    bankEnabled: document.getElementById('bank-enabled'),
+                    bankName: document.getElementById('bank-name'),
+                    bankAccount: document.getElementById('bank-account'),
+                    bankHolder: document.getElementById('bank-holder'),
+                    bankIban: document.getElementById('bank-iban')
+                };
+                
+                // التحقق من أن جميع العناصر موجودة
+                for (let key in elements) {
+                    if (!elements[key]) {
+                        console.error('❌ العنصر غير موجود:', key);
+                        showToast('خطأ: لم يتم العثور على جميع الحقول المطلوبة', 'error');
+                        return;
+                    }
                 }
-            };
-            
-            appData.paymentMethods = paymentMethods;
-            saveDataLocally();
-            
-            showToast('تم حفظ إعدادات طرق الدفع بنجاح', 'success');
-            updatePaymentMethodsDisplay();
+                
+                const paymentMethods = {
+                    instapay: {
+                        enabled: elements.instapayEnabled.checked,
+                        number: elements.instapayNumber.value.trim(),
+                        name: elements.instapayName.value.trim()
+                    },
+                    ewallet: {
+                        enabled: elements.ewalletEnabled.checked,
+                        type: elements.ewalletType.value,
+                        number: elements.ewalletNumber.value.trim(),
+                        name: elements.ewalletName.value.trim()
+                    },
+                    bank: {
+                        enabled: elements.bankEnabled.checked,
+                        bankName: elements.bankName.value.trim(),
+                        account: elements.bankAccount.value.trim(),
+                        holder: elements.bankHolder.value.trim(),
+                        iban: elements.bankIban.value.trim()
+                    }
+                };
+                
+                console.log('📦 البيانات المحفوظة:', paymentMethods);
+                
+                appData.paymentMethods = paymentMethods;
+                saveDataLocally();
+                
+                showToast('تم حفظ إعدادات طرق الدفع بنجاح', 'success');
+                updatePaymentMethodsDisplay();
+                
+                console.log('✅ تم الحفظ بنجاح');
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الإعدادات:', error);
+                showToast('حدث خطأ أثناء الحفظ: ' + error.message, 'error');
+            }
         }
 
         function loadPaymentSettings() {
