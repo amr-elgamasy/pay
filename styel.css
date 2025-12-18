@@ -277,19 +277,18 @@
             padding: 0 15px;
         }
 
-        /* استثناء للوحة التحكم */
-        #admin .admin-layout {
-            max-width: 100%;
-            margin: -2rem -15px;
-        }
-
         .page {
             display: none;
-            animation: fadeIn 0.3s ease-in;
         }
 
         .page.active {
             display: block;
+        }
+
+        /* قسم الإدارة يأخذ المساحة كاملة */
+        #admin {
+            padding: 0;
+            margin: 0;
         }
 
         @keyframes fadeIn {
