@@ -361,6 +361,10 @@
                                     <i class="fas fa-credit-card"></i>
                                     <span>طرق الدفع</span>
                                 </a>
+                                <a href="#admin-security" class="sidebar-link" onclick="showAdminSection('admin-security')">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>إعدادات الأمان</span>
+                                </a>
                                 <a href="#admin-danger" class="sidebar-link danger" onclick="showAdminSection('admin-danger')">
                                     <i class="fas fa-exclamation-triangle"></i>
                                     <span>منطقة الخطر</span>
@@ -572,6 +576,51 @@
                             </button>
                         </div>
                     </div>
+                            </div>
+
+                            <!-- قسم إعدادات الأمان -->
+                            <div id="admin-security" class="admin-section-content">
+                                <div class="section-header">
+                                    <h2><i class="fas fa-shield-alt"></i> إعدادات الأمان</h2>
+                                </div>
+                                <div class="card admin-section" data-aos="fade-up" data-aos-delay="100">
+                                    <h2 class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white;">
+                                        <i class="fas fa-key"></i> تغيير بيانات تسجيل الدخول
+                                    </h2>
+                                    <div style="padding: 1.5rem;">
+                                        <form id="security-settings-form" style="display: grid; gap: 1.5rem; max-width: 600px;">
+                                            <div style="background: rgba(59, 130, 246, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                                <h3 style="margin: 0 0 1.5rem 0; color: #3b82f6; font-size: 1.1rem;">
+                                                    <i class="fas fa-user-lock"></i> تغيير اسم المستخدم وكلمة المرور
+                                                </h3>
+                                                <div class="form-group">
+                                                    <label for="new-admin-username"><i class="fas fa-user"></i> اسم المستخدم الجديد</label>
+                                                    <input type="text" id="new-admin-username" placeholder="أدخل اسم المستخدم الجديد" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="current-password"><i class="fas fa-lock"></i> كلمة المرور الحالية</label>
+                                                    <input type="password" id="current-password" placeholder="للتأكيد" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="new-password"><i class="fas fa-key"></i> كلمة المرور الجديدة</label>
+                                                    <input type="password" id="new-password" placeholder="أدخل كلمة مرور جديدة" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="confirm-password"><i class="fas fa-check-double"></i> تأكيد كلمة المرور</label>
+                                                    <input type="password" id="confirm-password" placeholder="أعد إدخال كلمة المرور" required>
+                                                </div>
+                                                <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 8px; border-right: 4px solid #f59e0b; margin-top: 1rem;">
+                                                    <p style="margin: 0; color: #92400e; font-size: 0.9rem;">
+                                                        <i class="fas fa-exclamation-circle"></i> تأكد من حفظ اسم المستخدم وكلمة المرور الجديدة في مكان آمن
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="updateAdminCredentials(event)" class="btn" id="save-security-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); font-weight: 600; padding: 1rem;">
+                                                <i class="fas fa-save"></i> حفظ التغييرات
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- قسم منطقة الخطر -->
@@ -1225,6 +1274,83 @@
             container.innerHTML = html;
         }
 
+        // ========== دالة تحديث بيانات تسجيل الدخول ==========
+        function updateAdminCredentials(event) {
+            try {
+                const newUsername = document.getElementById('new-admin-username').value.trim();
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+
+                // التحقق من الحقول
+                if (!newUsername || !currentPassword || !newPassword || !confirmPassword) {
+                    showToast('يرجى ملء جميع الحقول', 'warning');
+                    return;
+                }
+
+                // التحقق من كلمة المرور الحالية
+                if (currentPassword !== appData.adminCredentials.password) {
+                    showToast('كلمة المرور الحالية غير صحيحة', 'error');
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('current-password').focus();
+                    return;
+                }
+
+                // التحقق من تطابق كلمة المرور الجديدة
+                if (newPassword !== confirmPassword) {
+                    showToast('كلمة المرور الجديدة غير متطابقة', 'error');
+                    document.getElementById('confirm-password').value = '';
+                    return;
+                }
+
+                // التحقق من طول كلمة المرور
+                if (newPassword.length < 6) {
+                    showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
+                    return;
+                }
+
+                // تحديث بيانات الدخول
+                appData.adminCredentials = {
+                    username: newUsername,
+                    password: newPassword
+                };
+
+                // حفظ التغييرات
+                saveDataLocally();
+
+                // رسالة نجاح
+                showToast('✓ تم تحديث بيانات تسجيل الدخول بنجاح!', 'success');
+
+                // تأثير بصري على الزر
+                const saveBtn = event?.target;
+                if (saveBtn) {
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = '<i class="fas fa-check-circle"></i> تم الحفظ بنجاح!';
+                    saveBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    setTimeout(() => {
+                        saveBtn.innerHTML = originalText;
+                        saveBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)';
+                    }, 2000);
+                }
+
+                // مسح الحقول
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+
+                // رسالة تحذيرية إضافية
+                setTimeout(() => {
+                    showToast('تم تغيير بيانات الدخول. احفظها في مكان آمن!', 'info');
+                }, 2500);
+
+            } catch (error) {
+                console.error('❌ خطأ في تحديث بيانات الدخول:', error);
+                showToast('حدث خطأ أثناء التحديث: ' + error.message, 'error');
+            }
+        }
+
+        // ========== نهاية دالة تحديث بيانات تسجيل الدخول ==========
+
         // تحميل البيانات من Google Sheets أو LocalStorage
         async function loadData() {
             // محاولة جلب البيانات من Google Sheets
@@ -1394,6 +1520,14 @@
             const targetLink = document.querySelector(`.sidebar-link[onclick*="${sectionId}"]`);
             if (targetLink) {
                 targetLink.classList.add('active');
+            }
+
+            // تحميل البيانات عند فتح قسم الأمان
+            if (sectionId === 'admin-security') {
+                const usernameField = document.getElementById('new-admin-username');
+                if (usernameField && appData.adminCredentials) {
+                    usernameField.value = appData.adminCredentials.username;
+                }
             }
             
             AOS.refresh();
