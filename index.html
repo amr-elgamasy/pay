@@ -1106,33 +1106,16 @@
         // ========== عداد الوقت لصفحة الإيداع ==========
         let depositTimer = null;
         let depositTimeRemaining = 600; // 10 دقائق بالثواني
-        let userInteracted = false;
 
         function initDepositTimer() {
             const depositPage = document.getElementById('add-deposit');
             const timerDisplay = document.getElementById('timer-display');
-            const timerContainer = document.getElementById('deposit-timer');
             
             if (!depositPage || !timerDisplay) return;
             
-            // إيقاف العداد عند التفاعل مع النموذج
-            const formInputs = depositPage.querySelectorAll('input, textarea, select');
-            formInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    if (!userInteracted) {
-                        userInteracted = true;
-                        stopDepositTimer();
-                        if (timerContainer) {
-                            timerContainer.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                            timerDisplay.innerHTML = '<i class="fas fa-check-circle"></i> تم بدء الإدخال';
-                        }
-                    }
-                });
-            });
-            
             // بدء العداد عند الدخول لصفحة الإيداع
             const observer = new MutationObserver(() => {
-                if (depositPage.classList.contains('active') && !userInteracted) {
+                if (depositPage.classList.contains('active')) {
                     startDepositTimer();
                 } else if (!depositPage.classList.contains('active')) {
                     stopDepositTimer();
@@ -1151,7 +1134,7 @@
         }
 
         function startDepositTimer() {
-            if (depositTimer || userInteracted) return;
+            if (depositTimer) return;
             
             depositTimeRemaining = 600; // إعادة تعيين الوقت
             updateTimerDisplay();
