@@ -1445,7 +1445,7 @@
                 }));
                 
                 // استعادة طرق الدفع - من Google Sheets أولاً، ثم من localStorage
-                if (cloudData.paymentMethods && (cloudData.paymentMethods.instapay || cloudData.paymentMethods.ewallet || cloudData.paymentMethods.bank)) {
+                if (cloudData.paymentMethods) {
                     appData.paymentMethods = cloudData.paymentMethods;
                     console.log('✅ استعادة طرق الدفع من Google Sheets:', appData.paymentMethods);
                 } else if (currentPaymentMethods) {
