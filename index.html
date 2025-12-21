@@ -1357,6 +1357,9 @@
             const cloudData = await fetchDataFromGoogleSheets();
             
             if (cloudData) {
+                // حفظ طرق الدفع الحالية قبل استبدال البيانات
+                const currentPaymentMethods = appData.paymentMethods;
+                
                 // تحويل البيانات من العربية إلى الإنجليزية
                 appData.deposits = (cloudData.deposits || []).map(d => ({
                     id: d.ID || d.id,
@@ -1386,15 +1389,31 @@
                     status: translateStatus(w.الحالة || w.status || 'pending')
                 }));
                 
+                // استعادة طرق الدفع المحفوظة
+                if (currentPaymentMethods) {
+                    appData.paymentMethods = currentPaymentMethods;
+                }
+                
                 // حفظ نسخة محلية كـ cache
                 saveDataLocally();
             } else {
                 // استخدام البيانات المحلية (LocalStorage) كخطة احتياطية
                 const savedData = localStorage.getItem('flosnaData');
                 if (savedData) {
-                    appData = JSON.parse(savedData);
+                    const loadedData = JSON.parse(savedData);
+                    
+                    // الاحتفاظ بجميع البيانات بما فيها طرق الدفع
+                    appData = loadedData;
+                    
                     if (!appData.withdrawals) {
                         appData.withdrawals = [];
+                    }
+                    if (!appData.paymentMethods) {
+                        appData.paymentMethods = {
+                            instapay: {enabled: false, number: '', name: ''},
+                            ewallet: {enabled: false, type: '', number: '', name: ''},
+                            bank: {enabled: false, bankName: '', account: '', holder: '', iban: ''}
+                        };
                     }
                 }
             }
