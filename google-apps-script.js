@@ -33,6 +33,10 @@ function doGet(e) {
         return deleteWithdrawal(data);
       } else if (action === 'deleteAll') {
         return deleteAllData();
+      } else if (action === 'getPaymentMethods') {
+        return getPaymentMethods();
+      } else if (action === 'savePaymentMethods') {
+        return savePaymentMethods(data);
       }
       
       return createResponse({status: 'error', message: 'Unknown action: ' + action});
@@ -73,6 +77,10 @@ function doPost(e) {
       return deleteExpense(data);
     } else if (action === 'deleteWithdrawal') {
       return deleteWithdrawal(data);
+    } else if (action === 'getPaymentMethods') {
+      return getPaymentMethods();
+    } else if (action === 'savePaymentMethods') {
+      return savePaymentMethods(data);
     }
     
     return createResponse({status: 'error', message: 'Unknown action: ' + action});
@@ -100,6 +108,9 @@ function getAllData() {
     .concat(readSheet(ss, 'السحوبات_المقبولة'))
     .concat(readSheet(ss, 'السحوبات_المرفوضة'));
   
+  // تحميل طرق الدفع
+  const paymentMethods = getPaymentMethodsData(ss);
+  
   Logger.log('✅ Data retrieved: ' + deposits.length + ' deposits, ' + expenses.length + ' expenses, ' + withdrawals.length + ' withdrawals');
   
   return createResponse({
@@ -107,7 +118,8 @@ function getAllData() {
     data: {
       deposits: deposits,
       expenses: expenses,
-      withdrawals: withdrawals
+      withdrawals: withdrawals,
+      paymentMethods: paymentMethods
     }
   });
 }
@@ -415,6 +427,109 @@ function deleteAllData() {
     return createResponse({status: 'success', message: 'All data deleted successfully'});
   } catch (error) {
     Logger.log('❌ Error deleting all data: ' + error.toString());
+    return createResponse({status: 'error', message: error.toString()});
+  }
+}
+// ============================================================
+// ?? ????? ??? ?????
+// ============================================================
+
+// ???? ?????? ??? ????? ?? Google Sheets
+function getPaymentMethodsData(ss) {
+  const sheet = ss.getSheetByName('???????_???_?????');
+  if (!sheet) {
+    Logger.log('?? Sheet ???????_???_????? not found, creating default payment methods');
+    return {
+      instapay: {enabled: false, number: '', name: ''},
+      ewallet: {enabled: false, type: '', number: '', name: ''},
+      bank: {enabled: false, bankName: '', account: '', holder: '', iban: ''}
+    };
+  }
+  
+  try {
+    const data = sheet.getRange(2, 1, 1, 12).getValues()[0];
+    
+    return {
+      instapay: {
+        enabled: data[0] === 'TRUE' || data[0] === true,
+        number: data[1] || '',
+        name: data[2] || ''
+      },
+      ewallet: {
+        enabled: data[3] === 'TRUE' || data[3] === true,
+        type: data[4] || '',
+        number: data[5] || '',
+        name: data[6] || ''
+      },
+      bank: {
+        enabled: data[7] === 'TRUE' || data[7] === true,
+        bankName: data[8] || '',
+        account: data[9] || '',
+        holder: data[10] || '',
+        iban: data[11] || ''
+      }
+    };
+  } catch (error) {
+    Logger.log('? Error reading payment methods: ' + error.toString());
+    return {
+      instapay: {enabled: false, number: '', name: ''},
+      ewallet: {enabled: false, type: '', number: '', name: ''},
+      bank: {enabled: false, bankName: '', account: '', holder: '', iban: ''}
+    };
+  }
+}
+
+// ???? ?????? ??? ????? ???
+function getPaymentMethods() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const paymentMethods = getPaymentMethodsData(ss);
+  
+  return createResponse({
+    status: 'success',
+    data: paymentMethods
+  });
+}
+
+// ???? ???? ??? ????? ?? Google Sheets
+function savePaymentMethods(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('???????_???_?????');
+  
+  // ????? ????? ??? ?? ??? ??????
+  if (!sheet) {
+    sheet = ss.insertSheet('???????_???_?????');
+    // ????? ????????
+    sheet.getRange(1, 1, 1, 12).setValues([[
+      'Instapay ????', 'Instapay ???', 'Instapay ???',
+      '????? ?????', '????? ???', '????? ???', '????? ???',
+      '??? ????', '??? ???', '??? ????', '??? ???? ??????', '??? IBAN'
+    ]]);
+    sheet.getRange(1, 1, 1, 12).setFontWeight('bold').setBackground('#667eea').setFontColor('#ffffff');
+  }
+  
+  try {
+    const pm = data.paymentMethods;
+    
+    // ??? ???????? ?? ???? ??????
+    sheet.getRange(2, 1, 1, 12).setValues([[
+      pm.instapay.enabled,
+      pm.instapay.number,
+      pm.instapay.name,
+      pm.ewallet.enabled,
+      pm.ewallet.type,
+      pm.ewallet.number,
+      pm.ewallet.name,
+      pm.bank.enabled,
+      pm.bank.bankName,
+      pm.bank.account,
+      pm.bank.holder,
+      pm.bank.iban
+    ]]);
+    
+    Logger.log('? Payment methods saved successfully');
+    return createResponse({status: 'success', message: 'Payment methods saved successfully'});
+  } catch (error) {
+    Logger.log('? Error saving payment methods: ' + error.toString());
     return createResponse({status: 'error', message: error.toString()});
   }
 }

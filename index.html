@@ -1143,6 +1143,19 @@
                 saveDataLocally();
                 console.log('✅ تم الحفظ في localStorage');
                 
+                // حفظ طرق الدفع في Google Sheets أيضاً
+                sendToGoogleSheets('savePaymentMethods', {paymentMethods: paymentMethods})
+                    .then(result => {
+                        if (result.status === 'success') {
+                            console.log('✅ تم حفظ طرق الدفع في Google Sheets');
+                        } else {
+                            console.warn('⚠️ فشل حفظ طرق الدفع في Google Sheets:', result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('⚠️ خطأ في حفظ طرق الدفع في Google Sheets:', error);
+                    });
+                
                 // رسالة نجاح واضحة ومميزة
                 showToast('✓ تم حفظ إعدادات طرق الدفع بنجاح!', 'success');
                 
@@ -1431,10 +1444,13 @@
                     status: translateStatus(w.الحالة || w.status || 'pending')
                 }));
                 
-                // استعادة طرق الدفع المحفوظة
-                if (currentPaymentMethods) {
+                // استعادة طرق الدفع - من Google Sheets أولاً، ثم من localStorage
+                if (cloudData.paymentMethods && (cloudData.paymentMethods.instapay || cloudData.paymentMethods.ewallet || cloudData.paymentMethods.bank)) {
+                    appData.paymentMethods = cloudData.paymentMethods;
+                    console.log('✅ استعادة طرق الدفع من Google Sheets:', appData.paymentMethods);
+                } else if (currentPaymentMethods) {
                     appData.paymentMethods = currentPaymentMethods;
-                    console.log('✅ استعادة طرق الدفع بعد التحديث:', appData.paymentMethods);
+                    console.log('✅ استعادة طرق الدفع من localStorage:', appData.paymentMethods);
                 } else {
                     console.log('⚠️ لم يتم العثور على طرق دفع محفوظة');
                 }
