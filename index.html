@@ -165,6 +165,20 @@
                         <i class="fas fa-plus-circle"></i>
                         إضافة إيداع جديد
                     </h2>
+                    
+                    <!-- عداد الوقت -->
+                    <div id="deposit-timer" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
+                        <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-clock"></i> الوقت المتبقي لإتمام الإيداع
+                        </div>
+                        <div id="timer-display" style="font-size: 2rem; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 2px;">
+                            10:00
+                        </div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.9;">
+                            سيتم تحديث الصفحة تلقائياً عند انتهاء الوقت
+                        </div>
+                    </div>
+                    
                     <form id="deposit-form">
                         <div class="form-group">
                             <label for="depositor-name"><i class="fas fa-user"></i> اسم العضو</label>
@@ -1086,7 +1100,104 @@
             loadPaymentSettings();
             updatePaymentMethodsDisplay();
             updateUI();
+            initDepositTimer();
         });
+
+        // ========== عداد الوقت لصفحة الإيداع ==========
+        let depositTimer = null;
+        let depositTimeRemaining = 600; // 10 دقائق بالثواني
+        let userInteracted = false;
+
+        function initDepositTimer() {
+            const depositPage = document.getElementById('add-deposit');
+            const timerDisplay = document.getElementById('timer-display');
+            const timerContainer = document.getElementById('deposit-timer');
+            
+            if (!depositPage || !timerDisplay) return;
+            
+            // إيقاف العداد عند التفاعل مع النموذج
+            const formInputs = depositPage.querySelectorAll('input, textarea, select');
+            formInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    if (!userInteracted) {
+                        userInteracted = true;
+                        stopDepositTimer();
+                        if (timerContainer) {
+                            timerContainer.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                            timerDisplay.innerHTML = '<i class="fas fa-check-circle"></i> تم بدء الإدخال';
+                        }
+                    }
+                });
+            });
+            
+            // بدء العداد عند الدخول لصفحة الإيداع
+            const observer = new MutationObserver(() => {
+                if (depositPage.classList.contains('active') && !userInteracted) {
+                    startDepositTimer();
+                } else if (!depositPage.classList.contains('active')) {
+                    stopDepositTimer();
+                }
+            });
+            
+            observer.observe(depositPage, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+            
+            // بدء العداد إذا كانت الصفحة نشطة حالياً
+            if (depositPage.classList.contains('active')) {
+                startDepositTimer();
+            }
+        }
+
+        function startDepositTimer() {
+            if (depositTimer || userInteracted) return;
+            
+            depositTimeRemaining = 600; // إعادة تعيين الوقت
+            updateTimerDisplay();
+            
+            depositTimer = setInterval(() => {
+                depositTimeRemaining--;
+                updateTimerDisplay();
+                
+                if (depositTimeRemaining <= 0) {
+                    stopDepositTimer();
+                    showToast('انتهى الوقت! سيتم تحديث الصفحة...', 'warning');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        function stopDepositTimer() {
+            if (depositTimer) {
+                clearInterval(depositTimer);
+                depositTimer = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const timerDisplay = document.getElementById('timer-display');
+            if (!timerDisplay) return;
+            
+            const minutes = Math.floor(depositTimeRemaining / 60);
+            const seconds = depositTimeRemaining % 60;
+            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            timerDisplay.textContent = timeString;
+            
+            // تغيير اللون عند الوقت القليل المتبقي
+            const timerContainer = document.getElementById('deposit-timer');
+            if (timerContainer) {
+                if (depositTimeRemaining <= 60) {
+                    timerContainer.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                    timerDisplay.style.animation = 'pulse 1s infinite';
+                } else if (depositTimeRemaining <= 180) {
+                    timerContainer.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                }
+            }
+        }
 
         // ========== إدارة طرق الدفع ==========
         
